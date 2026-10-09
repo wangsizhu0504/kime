@@ -114,9 +114,6 @@ struct AboutView: View {
                 Image("GitHubMark").resizable().scaledToFit()
             }
             Rectangle().fill(Theme.divider).frame(height: 1).padding(.horizontal, 20)
-            projectLink("上游官方网站", address: "aime.zool.app", destination: "https://aime.zool.app") {
-                Image(systemName: "globe").font(.title2)
-            }
         }
     }
 

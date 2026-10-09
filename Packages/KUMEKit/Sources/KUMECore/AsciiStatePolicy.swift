@@ -48,6 +48,8 @@ public struct AsciiStatePolicy: Sendable {
         }
     }
 
+    public mutating func forget(app: String) { perApp.removeValue(forKey: app) }
+
     /// Only the active input context may publish state. IMK can deactivate an older
     /// context after the next one has already become active.
     public mutating func record(_ ascii: Bool, app: String?, appDefault: Bool?, isActive: Bool = true) {

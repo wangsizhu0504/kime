@@ -31,7 +31,7 @@ struct PanelTests {
         #expect(light.schemeName == "kume_light")
         #expect(dark.schemeName == "kume_dark")
         #expect(light.layout == .linear)
-        #expect(light.fontPoint == 17)
+        #expect(light.fontPoint == 14)
     }
 
     @Test(arguments: ["argb", "rgba", "bgr"])
@@ -114,6 +114,38 @@ struct PanelTests {
             let url = URL(fileURLWithPath: directory).appendingPathComponent("I14-candidate-blue.png")
             try bitmap.representation(using: .png, properties: [:])?.write(to: url)
         }
+    }
+
+    @MainActor @Test(arguments: [false, true])
+    func inputModeStatusRendersThemeColors(dark: Bool) throws {
+        let view = CandidateView()
+        view.theme = PanelTheme(frontend: Self.frontend, dark: dark)
+        var state = PanelState(status: "中文")
+        state.isInputModeStatus = true
+        view.state = state
+        view.frame = NSRect(origin: .zero, size: view.fittingContentSize)
+        let bitmap = try #require(view.bitmapImageRepForCachingDisplay(in: view.bounds))
+        view.cacheDisplay(in: view.bounds, to: bitmap)
+        var backgroundPixels = 0
+        var textPixels = 0
+        for y in 0..<bitmap.pixelsHigh {
+            for x in 0..<bitmap.pixelsWide {
+                guard let color = bitmap.colorAt(x: x, y: y)?.usingColorSpace(.deviceRGB),
+                      color.alphaComponent > 0.95 else { continue }
+                let r = color.redComponent, g = color.greenComponent, b = color.blueComponent
+                if dark {
+                    if min(r, g, b) > 0.95 { backgroundPixels += 1 }
+                    if max(r, g, b) < 0.1 { textPixels += 1 }
+                } else {
+                    if r < 0.03, abs(g - 91.0/255) < 0.03, abs(b - 215.0/255) < 0.03 { backgroundPixels += 1 }
+                    if min(r, g, b) > 0.95 { textPixels += 1 }
+                }
+            }
+        }
+        #expect(backgroundPixels > 100)
+        #expect(textPixels > 5)
+        view.state = .sample
+        #expect(view.panelBackgroundColor == view.theme.effectiveBackColor)
     }
 
     /// Every shipped scheme must keep candidate text legible (WCAG AA for large text).

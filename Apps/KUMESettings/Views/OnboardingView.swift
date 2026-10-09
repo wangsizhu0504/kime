@@ -61,9 +61,7 @@ struct OnboardingView: View {
 
     /// Sample phrases the practice step teaches with (added to the phrase table in use).
     static let samples: [(code: String, text: String, title: String)] = [
-        ("am", "酷米输入法", "产品名"),
-        ("gw", "https://aime.zool.app", "官网"),
-        ("yx", "hello@zool.app", "邮箱"),
+        ("km", "酷米输入法", "产品名"),
     ]
 
     var body: some View {

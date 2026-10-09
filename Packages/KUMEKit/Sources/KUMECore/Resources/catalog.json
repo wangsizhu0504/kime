@@ -1028,7 +1028,7 @@
       "file": "frontend",
       "keypath": "style/kume/font_point",
       "type": "double",
-      "default": 16,
+      "default": 14,
       "min": 12,
       "max": 40,
       "doc": "#style",

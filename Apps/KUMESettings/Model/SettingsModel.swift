@@ -106,6 +106,17 @@ final class SettingsModel {
     var importReport: URL { paths.kumeDir.appendingPathComponent("import-report.json") }
     var hasImported: Bool { FileManager.default.fileExists(atPath: importReport.path) }
 
+    var shortcutConflicts: [ShortcutConflicts.Conflict] {
+        _ = revision
+        let schema = enabledSchemas.first.map { id in
+            var config = store.built(.schema(id)) ?? .map([])
+            config.set(.list(store.list(target: .schema(id), keypath: "key_binder/bindings")), at: "key_binder/bindings")
+            return config
+        }
+        let switcher = catalog.setting("switcher.hotkeys").flatMap { store.value(for: $0)?.listValue }?.compactMap(\.stringValue) ?? []
+        return ShortcutConflicts.find(ShortcutConflicts.bindings(schema: schema, switcher: switcher))
+    }
+
     // MARK: - Settings
 
     func value(_ setting: SettingCatalog.Setting) -> ConfigValue? {

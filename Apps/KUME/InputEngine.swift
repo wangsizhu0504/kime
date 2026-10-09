@@ -16,6 +16,7 @@ final class InputEngine {
     static let progressNotification = Notification.Name("app.kriszu.kume.deploy.progress")
 
     let panel = CandidatePanel()
+    var candidatePreferences = CandidatePreferences()
     /// Opt-in local word statistics (高频词); off unless enabled in Settings.
     let usage = UsageRecorder()
     /// kume/features.json, reloaded when Settings posts `KUMEFeatures.changedNotification`.
@@ -68,6 +69,17 @@ final class InputEngine {
     // MARK: - Lifecycle
 
     func start() {
+        candidatePreferences = (try? CandidatePreferences.load(paths)) ?? CandidatePreferences()
+        DistributedNotificationCenter.default().addObserver(forName: CandidatePreferences.changed, object: nil, queue: .main) { [weak self] _ in
+            MainActor.assumeIsolated {
+                guard let self else { return }
+                do {
+                    self.candidatePreferences = try CandidatePreferences.load(self.paths)
+                    self.activeController?.refreshCandidatePreferences()
+                }
+                catch { self.showStatus("候选偏好读取失败") }
+            }
+        }
         let fm = FileManager.default
         try? fm.createDirectory(at: paths.userDataDir, withIntermediateDirectories: true)
         try? fm.createDirectory(at: paths.logDir, withIntermediateDirectories: true)
@@ -434,7 +446,7 @@ final class InputEngine {
                   ["ascii_mode", "full_shape", "traditionalization", "ascii_punct", "emoji"].contains(name),
                   let session = activeController?.session else { return }
             let label = session.stateLabel(option: name, state: enabled, abbreviated: false)
-            if !label.isEmpty, activeController?.isComposing == false { showStatus(label) }
+            if !label.isEmpty, activeController?.isComposing == false { showStatus(label, inputMode: name == "ascii_mode") }
         case let .schemaChanged(_, name):
             if !name.isEmpty { showStatus(name) }
         default:
@@ -469,6 +481,10 @@ final class InputEngine {
             logger.error("frontend config unavailable or invalid; keeping previous configuration")
             return
         }
+        let previous = frontend["app_options"]
+        let updated = loaded["app_options"]
+        let ids = Set((previous?.entries ?? []).map(\.key) + (updated?.entries ?? []).map(\.key))
+        for id in ids where previous?[id] != updated?[id] { asciiState.forget(app: id) }
         frontend = loaded
         asciiState.scope = frontend.value(at: "ascii_state/scope")?.stringValue.flatMap(AsciiStateScope.init(rawValue:)) ?? .global
         refreshTheme(force: true)
@@ -486,12 +502,17 @@ final class InputEngine {
         var asciiMode: Bool?
         var inline: Bool?
         var vimMode = false
+        var resetModeOnActivate = false
     }
 
+    var temporaryAppModes: [String: Bool] = [:]
+
     func appOptions(for bundleID: String?) -> AppOptions {
-        guard let bundleID, let options = frontend["app_options"]?[bundleID] else { return AppOptions() }
+        guard let bundleID else { return AppOptions() }
+        let options = frontend["app_options"]?[bundleID] ?? .map([])
         var result = AppOptions()
-        result.asciiMode = options["ascii_mode"]?.boolValue
+        result.asciiMode = temporaryAppModes[bundleID] ?? options["ascii_mode"]?.boolValue
+        result.resetModeOnActivate = temporaryAppModes[bundleID] == nil && (options["reset_mode_on_activate"]?.boolValue ?? false)
         if options["no_inline"]?.boolValue == true { result.inline = false }
         if options["inline"]?.boolValue == true { result.inline = true }
         result.vimMode = options["vim_mode"]?.boolValue ?? false
@@ -500,9 +521,12 @@ final class InputEngine {
 
     // MARK: - Status bubble
 
-    func showStatus(_ text: String) {
+    func showStatus(_ text: String, inputMode: Bool = false) {
         statusHideTask?.cancel()
-        panel.show(PanelState(status: text), at: activeController?.cursorRect() ?? .zero)
+        refreshTheme()
+        var state = PanelState(status: text)
+        state.isInputModeStatus = inputMode
+        panel.show(state, at: activeController?.cursorRect() ?? .zero)
         statusHideTask = Task { @MainActor [weak self] in
             try? await Task.sleep(for: .milliseconds(900))
             guard !Task.isCancelled, let self else { return }

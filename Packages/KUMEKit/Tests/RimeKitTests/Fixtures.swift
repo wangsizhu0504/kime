@@ -69,6 +69,12 @@ enum Fixtures {
     你好\tni hao\t1000
     世界\tshi jie\t800
     是\tshi\t500
+    时\tshi\t400
+    事\tshi\t300
+    市\tshi\t200
+    十\tshi\t100
+    诗\tshi\t90
+    石\tshi\t80
     界\tjie\t50
     """
 

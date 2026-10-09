@@ -94,6 +94,46 @@ struct RimeKitTests {
         #expect(session.stateLabel(option: "ascii_mode", state: false, abbreviated: false) == "中")
     }
 
+    @Test func candidateNavigationPreservesCompositionAndCommitsHighlightedWord() throws {
+        let session = try RimeEngine.shared.createSession()
+        #expect(!session.moveCandidate(backward: false))
+        session.simulate(keySequence: "shi")
+        let before = session.context()
+        try #require(before.candidates.count > 1)
+        #expect(session.moveCandidate(backward: true))
+        #expect(session.context().highlightedIndex == 0)
+        #expect(session.moveCandidate(backward: false))
+        #expect(session.context().highlightedIndex == 1)
+        #expect(session.input == before.input)
+        #expect(session.context().composition.cursorPosition == before.composition.cursorPosition)
+        #expect(session.consumeCommit() == nil)
+        let chosen = session.context().candidates[1].text
+        session.processKey(RimeKey.space)
+        #expect(session.consumeCommit() == chosen)
+    }
+
+    @Test func candidateNavigationCrossesPagesAndStopsAtEnds() throws {
+        let session = try RimeEngine.shared.createSession()
+        session.simulate(keySequence: "shi")
+        let first = session.context()
+        try #require(!first.isLastPage)
+        session.highlightCandidate(onCurrentPage: first.candidates.count - 1)
+        #expect(session.moveCandidate(backward: false))
+        #expect(session.context().pageNumber == 1)
+        #expect(session.context().highlightedIndex == 0)
+        #expect(session.moveCandidate(backward: true))
+        #expect(session.context().pageNumber == 0)
+        #expect(session.context().highlightedIndex == first.candidates.count - 1)
+        session.changePage(backward: false)
+        let last = session.context()
+        try #require(last.isLastPage)
+        session.highlightCandidate(onCurrentPage: last.candidates.count - 1)
+        #expect(session.moveCandidate(backward: false))
+        #expect(session.context().pageNumber == last.pageNumber)
+        #expect(session.context().highlightedIndex == last.candidates.count - 1)
+        #expect(session.consumeCommit() == nil)
+    }
+
     @Test func frontendConsumedShortcutDoesNotBecomeAShiftTap() throws {
         let session = try RimeEngine.shared.createSession()
         session.setOption("ascii_mode", false)

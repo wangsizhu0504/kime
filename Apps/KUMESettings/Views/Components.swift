@@ -56,6 +56,7 @@ struct CatalogPane: View {
             if pane == .general { ScriptSection() }
             if pane == .keys {
                 QuickMenuShortcutsSection()
+                ShortcutConflictsSection()
                 Section("方案选单") {
                     ForEach(settings.filter { $0.id == "switcher.hotkeys" }) { SettingRow(setting: $0) }
                 }
@@ -477,5 +478,25 @@ struct PanelPreview: NSViewRepresentable {
 
     func sizeThatFits(_ proposal: ProposedViewSize, nsView: CandidateView, context: Context) -> CGSize? {
         nsView.fittingContentSize
+    }
+}
+
+struct ShortcutConflictsSection: View {
+    @Environment(SettingsModel.self) private var model
+    var body: some View {
+        let conflicts = model.shortcutConflicts
+        Section {
+            if conflicts.isEmpty {
+                Label("未发现当前方案与酷米快捷键重叠", systemImage: "checkmark.circle").foregroundStyle(.secondary)
+            } else {
+                ForEach(conflicts, id: \.key) { conflict in
+                    VStack(alignment: .leading, spacing: 4) {
+                        Label(HotkeyFormatter.display(conflict.key), systemImage: "exclamationmark.triangle").foregroundStyle(Theme.warning)
+                        Text(conflict.owners.joined(separator: "；")).font(.caption)
+                    }
+                }
+            }
+        } header: { Text("快捷键检查") }
+        footer: { Text("检查酷米固定快捷键、方案选单和主方案的按键绑定。不同条件下的重复绑定可能是方案有意设计；不检查系统或其他应用的快捷键。") }
     }
 }

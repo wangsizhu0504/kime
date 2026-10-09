@@ -417,7 +417,7 @@ public final class CandidatePanel {
 
     private func styleBackground(radius: CGFloat) {
         let theme = view.theme
-        let back = theme.effectiveBackColor
+        let back = view.panelBackgroundColor
         background.backgroundColor = CGColor(srgbRed: back.red, green: back.green, blue: back.blue, alpha: back.alpha)
         background.cornerCurve = .continuous
         effectMask.cornerCurve = .continuous

@@ -10,7 +10,7 @@ struct AppOptionsView: View {
 
     var body: some View {
         Form {
-            Section { PaneHeader(title: "应用", subtitle: "为编程类等应用设置默认英文（首次进入为英文，之后记住你在该应用里的选择，不影响其他应用）、关闭内联预编辑或启用 Vim 模式。", symbol: "square.grid.2x2") }
+            Section { PaneHeader(title: "应用", subtitle: "为编程类等应用设置默认英文（默认记住你的选择，也可设为每次进入恢复默认；菜单栏可临时覆盖，不影响其他应用）、关闭内联预编辑或启用 Vim 模式。", symbol: "square.grid.2x2") }
 
             Section { SmartSetupCard() }
 
@@ -248,6 +248,9 @@ private struct AppOptionRow: View {
                 .fixedSize()
                 Toggle("不内联", isOn: binding(\.noInline))
                 Toggle("Vim", isOn: binding(\.vimMode))
+                Toggle("进入时重置", isOn: binding(\.resetModeOnActivate))
+                    .disabled(option.initialMode == .shared)
+                    .help("每次进入文本框恢复此应用的默认中英文；关闭则记住临时切换。")
             }
             .toggleStyle(.checkbox)
             .labeledContentStyle(.automatic)

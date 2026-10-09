@@ -177,7 +177,7 @@ public struct PanelTheme: Sendable, Hashable {
         func point(_ key: String, _ fallback: Double) -> Double {
             Swift.min(Swift.max(double(key, fallback), Self.fontPointRange.lowerBound), Self.fontPointRange.upperBound)
         }
-        fontPoint = point("font_point", 17)
+        fontPoint = point("font_point", 14)
         labelFontFace = string("label_font_face", fontFace).components(separatedBy: ",").first!.trimmingCharacters(in: .whitespaces)
         labelFontPoint = point("label_font_point", fontPoint * 0.8)
         commentFontFace = string("comment_font_face", fontFace).components(separatedBy: ",").first!.trimmingCharacters(in: .whitespaces)

@@ -79,13 +79,15 @@ extension SettingsStore {
         public var initialMode: InitialMode
         public var noInline: Bool
         public var vimMode: Bool
+        public var resetModeOnActivate: Bool
         public var id: String { bundleID }
 
-        public init(bundleID: String, initialMode: InitialMode = .english, noInline: Bool = false, vimMode: Bool = false) {
+        public init(bundleID: String, initialMode: InitialMode = .english, noInline: Bool = false, vimMode: Bool = false, resetModeOnActivate: Bool = false) {
             self.bundleID = bundleID
             self.initialMode = initialMode
             self.noInline = noInline
             self.vimMode = vimMode
+            self.resetModeOnActivate = resetModeOnActivate
         }
 
         var configValue: ConfigValue {
@@ -96,6 +98,7 @@ extension SettingsStore {
             case .shared: break
             }
             if noInline { entries.append(.init("no_inline", true)) }
+            if resetModeOnActivate { entries.append(.init("reset_mode_on_activate", true)) }
             if vimMode { entries.append(.init("vim_mode", true)) }
             return .map(entries)
         }
@@ -110,7 +113,8 @@ extension SettingsStore {
                 bundleID: entry.key,
                 initialMode: entry.value["ascii_mode"]?.boolValue.map { $0 ? .english : .chinese } ?? .shared,
                 noInline: entry.value["no_inline"]?.boolValue ?? false,
-                vimMode: entry.value["vim_mode"]?.boolValue ?? false
+                vimMode: entry.value["vim_mode"]?.boolValue ?? false,
+                resetModeOnActivate: entry.value["reset_mode_on_activate"]?.boolValue ?? false
             )
         }
     }

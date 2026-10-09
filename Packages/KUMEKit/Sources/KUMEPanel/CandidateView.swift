@@ -26,6 +26,8 @@ public struct PanelState: Sendable, Equatable {
     public var isLastPage: Bool
     /// A short status message (e.g. "中" / "A") shown instead of candidates.
     public var status: String?
+    /// A Chinese/English mode switch uses a high-contrast theme-aware bubble.
+    public var isInputModeStatus = false
     /// The status is work in progress (an AI action): drawn small, and the panel adds a
     /// moving glow around it.
     public var busy = false
@@ -143,6 +145,7 @@ public final class CandidateView: NSView {
         return highlightPath(for: items[state.highlightedIndex].rect).cgPath
     }
     public var onSelect: ((Int) -> Void)?
+    public var candidateMenu: ((Int) -> NSMenu?)?
     /// Widest the content may get (0 = unlimited). A row that does not fit wraps onto the
     /// next line and a single candidate wider than this is cut with an ellipsis, so long
     /// phrases (addresses…) never push the panel off the screen.
@@ -161,6 +164,18 @@ public final class CandidateView: NSView {
     private var menuButtonRect: NSRect = .zero
     private var busyIconRect: NSRect = .zero
     private var badgeLayout: (line: NSAttributedString, rect: NSRect)?
+    var panelBackgroundColor: ThemeColor {
+        guard state.isInputModeStatus, state.status != nil else { return theme.effectiveBackColor }
+        return theme.hasDarkBackground ? ThemeColor(red: 1, green: 1, blue: 1)
+            : ThemeColor(red: 1/255, green: 91/255, blue: 215/255)
+    }
+
+    private var statusTextColor: ThemeColor {
+        guard state.isInputModeStatus else { return theme.candidateTextColor }
+        return theme.hasDarkBackground ? ThemeColor(red: 0, green: 0, blue: 0)
+            : ThemeColor(red: 1, green: 1, blue: 1)
+    }
+
     /// Whether the 中 / 英 chip is laid out (for tests).
     var hasStatusBadge: Bool {
         if needsLayoutPass { performLayout() }
@@ -383,7 +398,7 @@ public final class CandidateView: NSView {
             let point = state.busy ? max(11, (theme.fontPoint * 0.74).rounded()) : theme.fontPoint
             let line = NSMutableAttributedString(string: status, attributes: [
                 .font: font(theme.fontFace, point),
-                .foregroundColor: nsColor(theme.candidateTextColor).withAlphaComponent(state.busy ? 0.78 : 1),
+                .foregroundColor: nsColor(statusTextColor).withAlphaComponent(state.busy ? 0.78 : 1),
             ])
             if !state.statusHint.isEmpty {
                 line.append(NSAttributedString(string: "   " + state.statusHint, attributes: [
@@ -839,7 +854,7 @@ public final class CandidateView: NSView {
         let background = NSBezierPath(roundedRect: bounds.insetBy(dx: 0.5, dy: 0.5), xRadius: radius, yRadius: radius)
 
         if drawsBackground {
-            nsColor(theme.effectiveBackColor).setFill()
+            nsColor(panelBackgroundColor).setFill()
             background.fill()
         }
         // Highlights never poke out of the rounded background; edge-to-edge ones take
@@ -981,6 +996,13 @@ public final class CandidateView: NSView {
     }
 
     // MARK: - Mouse
+
+    public override func menu(for event: NSEvent) -> NSMenu? {
+        guard state.presentation == .candidates, state.board == nil, state.status == nil else { return nil }
+        let point = convert(event.locationInWindow, from: nil)
+        guard let index = items.firstIndex(where: { $0.rect.contains(point) }) else { return nil }
+        return candidateMenu?(index)
+    }
 
     public override func mouseUp(with event: NSEvent) {
         let point = convert(event.locationInWindow, from: nil)

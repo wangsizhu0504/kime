@@ -38,7 +38,7 @@ style:
   shadow_size: 0
   alpha: 1.0
   font_face: "PingFang SC"
-  font_point: 17
+  font_point: 14
   label_font_face: "SF Pro Rounded"
   label_font_point: 13
   comment_font_face: "PingFang SC"

@@ -146,6 +146,15 @@ public final class RimeSession {
         api.pointee.get_input(sid).map { String(cString: $0) } ?? ""
     }
 
+    /// Actual selection keys, independent of the labels a schema chooses to display.
+    public var selectionKeys: String {
+        var ctx = RimeContext_stdbool()
+        ctx.data_size = Int32(MemoryLayout<RimeContext_stdbool>.size - MemoryLayout<Int32>.size)
+        guard api.pointee.get_context(sid, &ctx) else { return "1234567890" }
+        defer { _ = api.pointee.free_context(&ctx) }
+        return ctx.menu.select_keys.map { String(cString: $0) } ?? "1234567890"
+    }
+
     public func context() -> RimeContextSnapshot {
         var ctx = RimeContext_stdbool()
         ctx.data_size = Int32(MemoryLayout<RimeContext_stdbool>.size - MemoryLayout<Int32>.size)
@@ -226,6 +235,27 @@ public final class RimeSession {
     @discardableResult
     public func highlightCandidate(onCurrentPage index: Int) -> Bool {
         api.pointee.highlight_candidate_on_current_page(sid, index)
+    }
+
+    /// Move the candidate highlight without moving the composition caret or committing.
+    /// At the ends, keep the highlight in place; between pages, select the adjacent item.
+    @discardableResult
+    public func moveCandidate(backward: Bool) -> Bool {
+        let current = context()
+        guard !current.candidates.isEmpty else { return false }
+        let index = current.highlightedIndex + (backward ? -1 : 1)
+        if current.candidates.indices.contains(index) {
+            return highlightCandidate(onCurrentPage: index)
+        }
+        if backward ? current.pageNumber > 0 : !current.isLastPage {
+            if changePage(backward: backward) {
+                let next = context()
+                if !next.candidates.isEmpty {
+                    return highlightCandidate(onCurrentPage: backward ? next.candidates.count - 1 : 0)
+                }
+            }
+        }
+        return true
     }
 
     @discardableResult

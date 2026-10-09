@@ -1,7 +1,8 @@
+import KUMECore
 import SwiftUI
 
 enum Pane: String, CaseIterable, Identifiable, Hashable {
-    case overview, schemas, general, switching, spelling, keys, appearance, apps, dictionaries, phrases, snippets, sync, stats, ai, advanced, about
+    case overview, schemas, general, switching, spelling, keys, appearance, apps, dictionaries, phrases, candidates, snippets, sync, stats, ai, advanced, about
 
     var id: String { rawValue }
 
@@ -17,6 +18,7 @@ enum Pane: String, CaseIterable, Identifiable, Hashable {
         case .apps: "应用"
         case .dictionaries: "词库"
         case .phrases: "自定义短语"
+        case .candidates: "候选词管理"
         case .snippets: "常用语"
         case .sync: "同步与备份"
         case .stats: "输入统计"
@@ -38,6 +40,7 @@ enum Pane: String, CaseIterable, Identifiable, Hashable {
         case .apps: "square.grid.2x2"
         case .dictionaries: "books.vertical"
         case .phrases: "text.quote"
+        case .candidates: "text.badge.checkmark"
         case .snippets: "list.bullet.rectangle"
         case .sync: "arrow.triangle.2.circlepath"
         case .stats: "chart.bar.xaxis"
@@ -63,7 +66,7 @@ enum Pane: String, CaseIterable, Identifiable, Hashable {
         ("智能", [.ai, .stats]),
         ("输入", [.schemas, .general, .switching, .spelling, .keys]),
         ("个性化", [.appearance, .apps]),
-        ("词库", [.dictionaries, .phrases, .snippets, .sync]),
+        ("词库", [.dictionaries, .phrases, .candidates, .snippets, .sync]),
         ("系统", [.advanced, .about]),
     ]
 }
@@ -71,6 +74,7 @@ enum Pane: String, CaseIterable, Identifiable, Hashable {
 struct RootView: View {
     @Environment(SettingsModel.self) private var model
     @Binding var selection: Pane?
+    @State private var search = ""
 
     var body: some View {
         NavigationSplitView {
@@ -106,7 +110,10 @@ struct RootView: View {
             .background(Theme.sidebar)
             .navigationSplitViewColumnWidth(min: 200, ideal: 220, max: 280)
         } detail: {
-            detail(for: selection ?? .overview)
+            Group {
+                if search.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty { detail(for: selection ?? .overview) }
+                else { SettingsSearchView(query: search, selection: $selection, search: $search) }
+            }
                 .background(Theme.canvas)
                 .overlay(alignment: .top) { DeployProgressBar() }
                 .toolbar {
@@ -119,6 +126,7 @@ struct RootView: View {
                     }
                 }
         }
+        .searchable(text: $search, prompt: "搜索设置，如字号、翻页、英文")
         .tint(Theme.accent)
         .onboardingHost(bypassed: selection == .about)
         .themeImportHost(model)
@@ -141,6 +149,7 @@ struct RootView: View {
         case .apps: AppOptionsView()
         case .dictionaries: DictionariesView()
         case .phrases: PhrasesView()
+        case .candidates: CandidatePreferencesView()
         case .snippets: SnippetsView()
         case .sync: SyncView()
         case .stats: UsageStatsView()
@@ -262,5 +271,38 @@ extension View {
     @ViewBuilder
     func adaptiveProminence(_ prominent: Bool) -> some View {
         if prominent { buttonStyle(.borderedProminent) } else { buttonStyle(.bordered) }
+    }
+}
+
+struct SettingsSearchView: View {
+    @Environment(SettingsModel.self) private var model
+    let query: String
+    @Binding var selection: Pane?
+    @Binding var search: String
+
+    var body: some View {
+        let results = SettingsSearch.results(query, catalog: model.catalog)
+        let routes = [("应用默认英文 · 按应用记忆 · 临时覆盖", Pane.apps), ("候选词管理 · 置顶 · 降低优先级 · 隐藏 · 撤销", .candidates), ("快捷键冲突", .keys)].filter {
+            $0.0.localizedCaseInsensitiveContains(query.trimmingCharacters(in: .whitespaces))
+        }
+        Form {
+            Section { PaneHeader(title: "搜索设置", subtitle: "搜索结果可直接修改，变更自动应用。", symbol: "magnifyingglass") }
+            if !routes.isEmpty {
+                Section("快捷入口") {
+                    ForEach(routes, id: \.1) { title, pane in
+                        Button(title) { selection = pane; search = "" }
+                    }
+                }
+            }
+            if results.isEmpty && routes.isEmpty {
+                Section { Text("没有匹配的设置，可尝试“字号”“翻页”或“英文”。").foregroundStyle(.secondary) }
+            } else {
+                ForEach(model.catalog.groups.filter { group in results.contains { $0.group == group.id } }) { group in
+                    Section(group.title) {
+                        ForEach(results.filter { $0.group == group.id }) { setting in SettingRow(setting: setting) }
+                    }
+                }
+            }
+        }.formStyle(.cards)
     }
 }

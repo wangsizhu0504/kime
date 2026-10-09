@@ -33,6 +33,9 @@ final class KUMEInputController: IMKInputController {
     var recentText = RecentText()
     /// Text of the latest commit (see `commitForAction`).
     private var lastCommitted = ""
+    private var candidateOrder: [Int] = []
+    private var candidatePageKey = ""
+    private var managedCandidate: CandidatePreferences.Rule?
     private var draftTimer: Task<Void, Never>?
     /// Page depth and symbol category last drawn, to pick the menu's transition direction.
     var menuShown: (depth: Int, category: Int) = (0, 0)
@@ -117,7 +120,12 @@ final class KUMEInputController: IMKInputController {
         // Nothing here may call back into the client: it is blocked until activateServer
         // returns. A reused session may be stale if another window of the same app
         // switched Chinese/English meanwhile, so re-apply the remembered state.
-        if ensureSession() != nil { applyAppOptions(newSession: false) }
+        if let session = ensureSession() {
+            if appOptions.resetModeOnActivate, let mode = appOptions.asciiMode {
+                session.setOption("ascii_mode", mode)
+                rememberAsciiMode()
+            } else { applyAppOptions(newSession: false) }
+        }
     }
 
     nonisolated override func deactivateServer(_ sender: Any!) {
@@ -149,6 +157,8 @@ final class KUMEInputController: IMKInputController {
     /// composition and the candidate list are never handed to the action.
     func commitForAction(client: (any IMKTextInput)?) -> String? {
         guard let session = liveSession, isComposing else { return nil }
+        let context = session.context()
+        guard context.candidates.isEmpty || !candidateIndices(context, session: session).isEmpty else { return nil }
         lastCommitted = ""
         session.commitComposition()
         sync(client: client ?? textClient)
@@ -157,7 +167,15 @@ final class KUMEInputController: IMKInputController {
 
     private func commitPending(_ client: (any IMKTextInput)?) {
         if let session = liveSession, isComposing {
-            session.commitComposition()
+            let context = session.context()
+            let visible = candidateIndices(context, session: session)
+            if !context.candidates.isEmpty, visible.isEmpty {
+                // Never silently commit a word the user hid when focus leaves the field.
+                let raw = draft.take() + context.input
+                session.clearComposition()
+                (client ?? textClient)?.insertText(raw, replacementRange: NSRange(location: NSNotFound, length: 0))
+                hasMarkedText = false
+            } else { session.commitComposition() }
             sync(client: client ?? textClient)
         }
         // Leaving the field (click elsewhere, app switch): the draft goes into the app.
@@ -254,6 +272,16 @@ final class KUMEInputController: IMKInputController {
                 return false
             }
             engine.cancelStatus()
+            if handlePreferredCandidateKey(keysym, event: event, session: session, client: client) { return true }
+            // Horizontal candidates follow the visible left/right direction. Rime's
+            // default navigator instead moves the spelling caret with these keys.
+            if engine.panel.theme.layout == .linear, !engine.panel.theme.vertical,
+               event.modifierFlags.intersection([.command, .control, .option, .shift]).isEmpty,
+               keysym == RimeKey.left || keysym == RimeKey.right,
+               session.moveCandidate(backward: keysym == RimeKey.left) {
+                sync(client: client)
+                return true
+            }
             forwardedToRime = true
             handled = session.processKey(keysym, modifiers: mask)
             // IMK never delivers key-ups. Report the release of each real press (not
@@ -509,7 +537,17 @@ final class KUMEInputController: IMKInputController {
             }
         }
 
-        let context = session.context()
+        var context = session.context()
+        let schema = session.currentSchema ?? ""
+        let pageKey = "\(schema)\u{0}\(context.input)\u{0}\(context.pageNumber)"
+        candidateOrder = candidateIndices(context, session: session)
+        if candidateOrder != Array(context.candidates.indices),
+           let first = candidateOrder.first,
+           pageKey != candidatePageKey || !candidateOrder.contains(context.highlightedIndex) {
+            session.highlightCandidate(onCurrentPage: first)
+            context = session.context()
+        }
+        candidatePageKey = pageKey
         isComposing = context.isComposing
         let theme = engine.panel.theme
         let inline = appOptions.inline ?? theme.inlinePreedit
@@ -569,17 +607,23 @@ final class KUMEInputController: IMKInputController {
         let composition = context.composition
         let start = composition.utf16Offset(ofUTF8: composition.selectionStart)
         let end = composition.utf16Offset(ofUTF8: composition.selectionEnd)
-        let state = PanelState(
+        var state = PanelState(
             preedit: composition.preedit,
             preeditSelection: NSRange(location: start, length: max(0, end - start)),
-            candidates: context.candidates.enumerated().map { index, candidate in
-                PanelState.Candidate(label: context.labels[safe: index] ?? "\(index + 1)", text: candidate.text, comment: candidate.comment)
+            candidates: candidateOrder.enumerated().map { index, source in
+                let candidate = context.candidates[source]
+                return PanelState.Candidate(label: context.labels[safe: index] ?? "\(index + 1)", text: candidate.text, comment: candidate.comment)
             },
-            highlightedIndex: context.highlightedIndex,
+            highlightedIndex: candidateOrder.firstIndex(of: context.highlightedIndex) ?? 0,
             pageNumber: context.pageNumber,
             isLastPage: context.isLastPage,
             showsMenuButton: engine.features.panelMenuButton
         )
+        if candidateOrder.isEmpty, !context.candidates.isEmpty {
+            state.status = "本页候选已隐藏"
+            state.statusHint = "翻页继续 · 设置中可恢复"
+        }
+        engine.panel.view.candidateMenu = { [weak self] index in self?.makeCandidateMenu(index) }
         engine.panel.view.onMenu = { [weak self] in self?.openMenu(client: nil) }
         engine.panel.view.onSelect = { [weak self] index in self?.select(index) }
         engine.panel.view.onPage = { [weak self] backward in self?.page(backward: backward) }
@@ -589,7 +633,8 @@ final class KUMEInputController: IMKInputController {
 
     private func select(_ index: Int) {
         guard let session = liveSession else { return }
-        session.selectCandidate(onCurrentPage: index)
+        guard candidateOrder.indices.contains(index) else { return }
+        session.selectCandidate(onCurrentPage: candidateOrder[index])
         sync(client: textClient)
     }
 
@@ -597,6 +642,76 @@ final class KUMEInputController: IMKInputController {
         guard let session = liveSession else { return }
         session.changePage(backward: backward)
         sync(client: textClient)
+    }
+
+    private func candidateIndices(_ context: RimeContextSnapshot, session: RimeSession) -> [Int] {
+        guard CandidatePreferences.supports(input: context.input, selectionKeys: session.selectionKeys) else {
+            return Array(context.candidates.indices)
+        }
+        return engine.candidatePreferences.order(schema: session.currentSchema ?? "", input: context.input, texts: context.candidates.map(\.text))
+    }
+
+    private func handlePreferredCandidateKey(_ key: Int32, event: NSEvent, session: RimeSession, client: (any IMKTextInput)?) -> Bool {
+        guard event.modifierFlags.intersection([.command, .control, .option, .shift]).isEmpty else { return false }
+        let context = session.context()
+        let order = candidateIndices(context, session: session)
+        guard !context.candidates.isEmpty, order != Array(context.candidates.indices) else { return false }
+        let selectionKeys = Array(session.selectionKeys.unicodeScalars)
+        if key == RimeKey.space {
+            if let source = order.firstIndex(of: context.highlightedIndex).map({ order[$0] }) ?? order.first {
+                session.selectCandidate(onCurrentPage: source)
+            }
+        } else if let index = selectionKeys.firstIndex(where: { Int32($0.value) == key }) {
+            if order.indices.contains(index) { session.selectCandidate(onCurrentPage: order[index]) }
+        } else if key == RimeKey.up || key == RimeKey.down ||
+                    (engine.panel.theme.layout == .linear && !engine.panel.theme.vertical && (key == RimeKey.left || key == RimeKey.right)) {
+            let backward = key == RimeKey.up || key == RimeKey.left
+            let index = (order.firstIndex(of: context.highlightedIndex) ?? 0) + (backward ? -1 : 1)
+            if order.indices.contains(index) { session.highlightCandidate(onCurrentPage: order[index]) }
+            else if backward ? context.pageNumber > 0 : !context.isLastPage { session.changePage(backward: backward) }
+        } else { return false }
+        sync(client: client)
+        return true
+    }
+
+    func refreshCandidatePreferences() {
+        candidatePageKey = ""
+        if ownsPanel, quickMenu == nil, polish == nil { sync(client: textClient) }
+    }
+
+    private func makeCandidateMenu(_ index: Int) -> NSMenu? {
+        guard let session = liveSession, candidateOrder.indices.contains(index) else { return nil }
+        let context = session.context()
+        let source = candidateOrder[index]
+        guard CandidatePreferences.supports(input: context.input, selectionKeys: session.selectionKeys) else { return nil }
+        guard context.candidates.indices.contains(source) else { return nil }
+        managedCandidate = .init(schema: session.currentSchema ?? "", input: context.input, text: context.candidates[source].text, action: .pin)
+        let menu = NSMenu(title: "候选词管理")
+        for (title, tag) in [("本页优先显示", 0), ("本页降低优先级", 1), ("此编码下隐藏（保留词库）", 2), ("恢复此词默认排序", 3), ("撤销上次候选调整", 4)] {
+            let item = NSMenuItem(title: title, action: #selector(changeCandidatePreference(_:)), keyEquivalent: "")
+            item.target = self; item.tag = tag
+            if tag == 4 { item.isEnabled = engine.candidatePreferences.undoRules != nil }
+            menu.addItem(item)
+        }
+        return menu
+    }
+
+    @objc private func changeCandidatePreference(_ sender: NSMenuItem) {
+        guard var rule = managedCandidate else { return }
+        do {
+            engine.candidatePreferences = try CandidatePreferences.update(engine.paths) { preferences in
+                switch sender.tag {
+                case 0: rule.action = .pin; preferences.set(rule)
+                case 1: rule.action = .lower; preferences.set(rule)
+                case 2: rule.action = .hide; preferences.set(rule)
+                case 3: preferences.remove(id: rule.id)
+                default: preferences.undo()
+                }
+            }
+            candidatePageKey = ""
+            DistributedNotificationCenter.default().postNotificationName(CandidatePreferences.changed, object: nil, userInfo: nil, deliverImmediately: true)
+            sync(client: textClient)
+        } catch { engine.showStatus("候选调整未保存：\(error.localizedDescription)") }
     }
 
     /// Cursor rectangle in screen coordinates.
@@ -636,6 +751,18 @@ final class KUMEInputController: IMKInputController {
         // No key equivalent: input menu shortcuts are live in every app, so ⌘, here would
         // shadow each app's own Settings shortcut (#6).
         menu.addItem(item(String(localized: "酷米输入法设置…"), #selector(openSettings(_:))))
+        menu.addItem(item("候选词管理…", #selector(openCandidatePreferences(_:))))
+        if let bundleID {
+            let modes = NSMenu(title: "当前应用临时模式")
+            modes.addItem(item("临时中文", #selector(temporaryChinese(_:))))
+            modes.addItem(item("临时英文", #selector(temporaryEnglish(_:))))
+            let restore = item("恢复应用设置", #selector(restoreAppMode(_:)))
+            restore.isEnabled = engine.temporaryAppModes[bundleID] != nil
+            modes.addItem(restore)
+            let parent = NSMenuItem(title: "当前应用临时模式（重启后失效）", action: nil, keyEquivalent: "")
+            parent.submenu = modes
+            menu.addItem(parent)
+        }
         if let update = engine.pendingUpdate {
             menu.addItem(item(String(localized: "更新到 \(update.version)…"), #selector(openUpdate(_:))))
         }
@@ -646,6 +773,23 @@ final class KUMEInputController: IMKInputController {
         menu.addItem(item(String(localized: "打开日志文件夹"), #selector(openLogFolder(_:))))
         return menu
     }
+
+    private func setTemporaryAppMode(_ mode: Bool?) {
+        guard let bundleID else { return }
+        engine.temporaryAppModes[bundleID] = mode
+        engine.asciiState.forget(app: bundleID)
+        appOptions = engine.appOptions(for: bundleID)
+        if let session = ensureSession() {
+            commitPending(textClient)
+            session.setOption("ascii_mode", mode ?? appOptions.asciiMode ?? engine.asciiState.global)
+            rememberAsciiMode()
+            engine.showStatus(session.option("ascii_mode") ? "英文" : "中文", inputMode: true)
+        }
+    }
+    @objc func openCandidatePreferences(_ sender: Any?) { openSettings(pane: "candidates") }
+    @objc func temporaryChinese(_ sender: Any?) { setTemporaryAppMode(false) }
+    @objc func temporaryEnglish(_ sender: Any?) { setTemporaryAppMode(true) }
+    @objc func restoreAppMode(_ sender: Any?) { setTemporaryAppMode(nil) }
 
     @objc func openSettings(_ sender: Any?) { openSettings(pane: nil) }
 
