@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate AIME's emoji board from the pinned Unicode 16.0 emoji-test.txt.
+"""Generate KUME's emoji board from the pinned Unicode 16.0 emoji-test.txt.
 
 Offline only. Supply the official source with --source; --check verifies an existing
 catalog without changing it. The Unicode data license accompanies SharedSupport.
@@ -85,7 +85,7 @@ def main():
     root = Path(__file__).resolve().parents[1]
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--source", type=Path, required=True)
-    parser.add_argument("--output", type=Path, default=root / "SharedSupport/aime/emoji.json")
+    parser.add_argument("--output", type=Path, default=root / "SharedSupport/kume/emoji.json")
     parser.add_argument("--check", action="store_true")
     args = parser.parse_args()
     try:

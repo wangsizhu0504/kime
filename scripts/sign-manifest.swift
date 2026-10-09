@@ -1,5 +1,5 @@
 // Signs (or verifies) a release manifest with Ed25519 (CryptoKit), writing <file>.sig as
-// base64. The private key comes from AIME_MANIFEST_KEY (base64 raw 32 bytes); the app
+// base64. The private key comes from KUME_MANIFEST_KEY (base64 raw 32 bytes); the app
 // embeds the public key (AppUpdateChecker.manifestPublicKey).
 //
 //   swift scripts/sign-manifest.swift sign latest.json
@@ -17,8 +17,8 @@ case "keygen":
     print("public: ", key.publicKey.rawRepresentation.base64EncodedString())
 case "sign":
     guard let path = args.dropFirst().first else { fail("usage: sign <file>") }
-    guard let raw = ProcessInfo.processInfo.environment["AIME_MANIFEST_KEY"].flatMap({ Data(base64Encoded: $0) }),
-          let key = try? Curve25519.Signing.PrivateKey(rawRepresentation: raw) else { fail("AIME_MANIFEST_KEY missing or invalid") }
+    guard let raw = ProcessInfo.processInfo.environment["KUME_MANIFEST_KEY"].flatMap({ Data(base64Encoded: $0) }),
+          let key = try? Curve25519.Signing.PrivateKey(rawRepresentation: raw) else { fail("KUME_MANIFEST_KEY missing or invalid") }
     let data = try Data(contentsOf: URL(fileURLWithPath: path))
     let signature = try key.signature(for: data)
     try (signature.base64EncodedString() + "\n").write(toFile: path + ".sig", atomically: true, encoding: .utf8)

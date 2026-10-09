@@ -1,15 +1,15 @@
 #!/usr/bin/env swift
-// Renders the input source (menu bar) icon: 「艾」 knocked out of a 22×16 pt rounded
+// Renders the input source (menu bar) icon: 「酷」 knocked out of a 22×16 pt rounded
 // rectangle, the shape macOS uses for its own input sources. The glyph outline comes
 // from Noto Sans SC (SIL OFL 1.1), the brand typeface; the font is not kept in the repo.
 //   swift scripts/gen-input-source-icon.swift <NotoSansSC[wght].ttf>
-// Writes assets/brand/aime/input-source-v2/AIME-ai.{pdf,svg} and Apps/AIME/Resources/AIME.pdf.
+// Writes assets/brand/kume/input-source-v2/KUME-ku.{pdf,svg} and Apps/KUME/Resources/KUME.pdf.
 import AppKit
 import CoreText
 import CryptoKit
 
 let root = URL(fileURLWithPath: #filePath).deletingLastPathComponent().deletingLastPathComponent()
-let fontSHA256 = "a3041811a78c361b1de50f953c805e0244951c21c5bd412f7232ef0d899af0da" // assets/brand/aime/base-v1/font-source.json
+let fontSHA256 = "a3041811a78c361b1de50f953c805e0244951c21c5bd412f7232ef0d899af0da" // assets/brand/kume/base-v1/font-source.json
 guard CommandLine.arguments.count == 2 else { fatalError("usage: gen-input-source-icon.swift <NotoSansSC[wght].ttf>") }
 let fontURL = URL(fileURLWithPath: CommandLine.arguments[1])
 let fontData = try Data(contentsOf: fontURL)
@@ -25,10 +25,10 @@ guard let descriptors = CTFontManagerCreateFontDescriptorsFromData(fontData as C
 let wght = 0x7767_6874 // 'wght'
 let descriptor = CTFontDescriptorCreateCopyWithAttributes(base, [kCTFontVariationAttribute: [wght: weight]] as CFDictionary)
 let font = CTFontCreateWithFontDescriptor(descriptor, glyphSize, nil)
-var character: UniChar = 0x827E // 艾
+var character: UniChar = 0x9177 // 酷
 var glyph: CGGlyph = 0
 guard CTFontGetGlyphsForCharacters(font, &character, &glyph, 1), glyph != 0,
-      let outline = CTFontCreatePathForGlyph(font, glyph, nil) else { fatalError("艾 is missing from the font") }
+      let outline = CTFontCreatePathForGlyph(font, glyph, nil) else { fatalError("酷 is missing from the font") }
 // Centre the glyph's ink, not its advance box, so it sits optically in the middle.
 let ink = outline.boundingBoxOfPath
 let centred = outline.copy(using: [CGAffineTransform(translationX: (width - ink.width) / 2 - ink.minX,
@@ -38,13 +38,13 @@ let frame = CGPath(roundedRect: CGRect(x: 0, y: 0, width: width, height: height)
 // cutting, or an even-odd fill would punch holes where the strokes cross.
 let icon = frame.subtracting(centred, using: .winding)
 
-let directory = root.appendingPathComponent("assets/brand/aime/input-source-v2")
+let directory = root.appendingPathComponent("assets/brand/kume/input-source-v2")
 try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
 
 // PDF: one black fill; the system tints it as a template image.
-let pdfURL = directory.appendingPathComponent("AIME-ai.pdf")
+let pdfURL = directory.appendingPathComponent("KUME-ku.pdf")
 var box = CGRect(x: 0, y: 0, width: width, height: height)
-let pdf = CGContext(pdfURL as CFURL, mediaBox: &box, [kCGPDFContextCreator: "AIME scripts/gen-input-source-icon.swift"] as CFDictionary)!
+let pdf = CGContext(pdfURL as CFURL, mediaBox: &box, [kCGPDFContextCreator: "KUME scripts/gen-input-source-icon.swift"] as CFDictionary)!
 pdf.beginPDFPage(nil)
 pdf.addPath(icon)
 pdf.setFillColor(.black)
@@ -73,6 +73,6 @@ let svg = """
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 16" width="22" height="16"><path fill="#000" fill-rule="evenodd" d="\(svgPath(icon))"/></svg>
 
 """
-try svg.write(to: directory.appendingPathComponent("AIME-ai.svg"), atomically: true, encoding: .utf8)
-try Data(contentsOf: pdfURL).write(to: root.appendingPathComponent("Apps/AIME/Resources/AIME.pdf"))
-print("input source icon written: 艾 in Noto Sans SC wght \(Int(weight)), \(Int(width))×\(Int(height)) pt")
+try svg.write(to: directory.appendingPathComponent("KUME-ku.svg"), atomically: true, encoding: .utf8)
+try Data(contentsOf: pdfURL).write(to: root.appendingPathComponent("Apps/KUME/Resources/KUME.pdf"))
+print("input source icon written: 酷 in Noto Sans SC wght \(Int(weight)), \(Int(width))×\(Int(height)) pt")

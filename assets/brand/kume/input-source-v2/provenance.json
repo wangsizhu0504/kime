@@ -1,0 +1,18 @@
+{
+  "subject": "KUME input source (menu bar) icon",
+  "shape": "22×16 pt rounded rectangle (radius 3.5 pt) with the merged glyph outline subtracted, matching macOS input source icons",
+  "glyph": "酷 (U+9177)",
+  "font": "Noto Sans SC",
+  "fontSource": "../base-v1/font-source.json",
+  "fontSHA256": "a3041811a78c361b1de50f953c805e0244951c21c5bd412f7232ef0d899af0da",
+  "weight": 650,
+  "size": 12.5,
+  "license": "SIL Open Font License 1.1 (../base-v1/licenses/NotoSansSC-OFL.txt); the outline is artwork made with the font, the font itself is not distributed",
+  "generator": "scripts/gen-input-source-icon.swift",
+  "files": {
+    "KUME-ku.pdf": "5124cd2a36eb5d54e0b0ec3384a73065b6c4f3823af4b24a7fd3f89e4c709dcc",
+    "KUME-ku.svg": "a708e3734443f49d14b864209ab7f03618410bc590020d3954cc2660f6d91bfa"
+  },
+  "upstreamIssue": "https://github.com/zoolapp/aime/issues/4",
+  "revision": "2026-10-09: renamed to KUME / 酷米输入法"
+}

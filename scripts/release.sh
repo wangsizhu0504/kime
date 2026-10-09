@@ -1,17 +1,17 @@
 #!/usr/bin/env bash
-# Builds the release artefacts for one version into dist/release/ (or $AIME_RELEASE_DIR):
-#   AIME-<version>.pkg    installer (scripts/package.sh)
-#   AIME-<version>.zip    AIME.app (with the CLI and AIME Settings.app inside)
-#   AIME-<version>-source.tar.gz  corresponding source (scripts/source-archive.sh; the pkg has GPL parts)
+# Builds the release artefacts for one version into dist/release/ (or $KUME_RELEASE_DIR):
+#   KUME-<version>.pkg    installer (scripts/package.sh)
+#   KUME-<version>.zip    KUME.app (with the CLI and KUME Settings.app inside)
+#   KUME-<version>-source.tar.gz  corresponding source (scripts/source-archive.sh; the pkg has GPL parts)
 #   SHA256SUMS.txt        checksums of the three files above
 #   RELEASE_NOTES.md      CHANGELOG section + signing status + checksums (not an asset)
 #
 # Usage: bash scripts/release.sh <version>      e.g. 0.2.0 or 0.2.0-beta.1 (a leading "v" is ok)
 #
-# Signing follows the existing scripts: ad-hoc unless AIME_SIGN_IDENTITY (Developer ID
-# Application) is set; the pkg is signed when AIME_INSTALLER_IDENTITY (Developer ID
-# Installer) is set. Notarization runs when all of AIME_NOTARY_KEY_PATH (.p8),
-# AIME_NOTARY_KEY_ID and AIME_NOTARY_ISSUER_ID are set (App Store Connect API key).
+# Signing follows the existing scripts: ad-hoc unless KUME_SIGN_IDENTITY (Developer ID
+# Application) is set; the pkg is signed when KUME_INSTALLER_IDENTITY (Developer ID
+# Installer) is set. Notarization runs when all of KUME_NOTARY_KEY_PATH (.p8),
+# KUME_NOTARY_KEY_ID and KUME_NOTARY_ISSUER_ID are set (App Store Connect API key).
 # Used by .github/workflows/release.yml; safe to run locally (writes only build/ and dist/).
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
@@ -21,45 +21,45 @@ VERSION="${1:?usage: scripts/release.sh <version>}"
 VERSION="${VERSION#v}"
 [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$ ]] || { echo "invalid version: $VERSION" >&2; exit 1; }
 BASE_VERSION="${VERSION%%-*}"
-OUT="${AIME_RELEASE_DIR:-$ROOT/dist/release}"
+OUT="${KUME_RELEASE_DIR:-$ROOT/dist/release}"
 
 # The bundle and CLI versions come from the sources; the tag must agree with them.
 APP_VERSION="$(awk -F'"' '/MARKETING_VERSION/ {print $2; exit}' project.yml)"
-CLI_VERSION="$(awk -F'"' '/^[[:space:]]*version: "/ {print $2; exit}' Packages/AIMEKit/Sources/aime/AIME.swift)"
+CLI_VERSION="$(awk -F'"' '/^[[:space:]]*version: "/ {print $2; exit}' Packages/KUMEKit/Sources/kume/KUME.swift)"
 if [[ "$APP_VERSION" != "$BASE_VERSION" || "$CLI_VERSION" != "$BASE_VERSION" ]]; then
   echo "version mismatch: tag $VERSION, project.yml MARKETING_VERSION $APP_VERSION, CLI $CLI_VERSION" >&2
   echo "update both (see docs/release-checklist.md) before tagging" >&2
   exit 1
 fi
 
-IDENTITY="${AIME_SIGN_IDENTITY:--}"
+IDENTITY="${KUME_SIGN_IDENTITY:--}"
 NOTARIZE=0
-if [[ -n "${AIME_NOTARY_KEY_PATH:-}" && -n "${AIME_NOTARY_KEY_ID:-}" && -n "${AIME_NOTARY_ISSUER_ID:-}" ]]; then
+if [[ -n "${KUME_NOTARY_KEY_PATH:-}" && -n "${KUME_NOTARY_KEY_ID:-}" && -n "${KUME_NOTARY_ISSUER_ID:-}" ]]; then
   NOTARIZE=1
-  [[ "$IDENTITY" != "-" && -n "${AIME_INSTALLER_IDENTITY:-}" ]] \
-    || { echo "notarization needs AIME_SIGN_IDENTITY and AIME_INSTALLER_IDENTITY" >&2; exit 1; }
+  [[ "$IDENTITY" != "-" && -n "${KUME_INSTALLER_IDENTITY:-}" ]] \
+    || { echo "notarization needs KUME_SIGN_IDENTITY and KUME_INSTALLER_IDENTITY" >&2; exit 1; }
 fi
 if [[ "$NOTARIZE" == 1 ]]; then STATUS=notarized
 elif [[ "$IDENTITY" != "-" ]]; then STATUS=signed
 else STATUS=preview
 fi
-echo "==> AIME $VERSION ($STATUS)"
+echo "==> KUME $VERSION ($STATUS)"
 
-# Waits up to AIME_NOTARY_WAIT (default 20m). A new team's first submissions can sit in
+# Waits up to KUME_NOTARY_WAIT (default 20m). A new team's first submissions can sit in
 # Apple's queue for hours: that is not a failure. The artefacts are still signed and
 # uploaded, the submission ids land in NOTARY_PENDING.txt, and scripts/finish-notarization.sh
 # staples them once Apple accepts. Only a rejection ("Invalid") fails the release.
 PENDING="$OUT/NOTARY_PENDING.txt"
 notarize() {  # <file>: 0 accepted, 2 still in progress; exits on rejection
   local file="$1" result id status
-  local auth=(--key "$AIME_NOTARY_KEY_PATH" --key-id "$AIME_NOTARY_KEY_ID" --issuer "$AIME_NOTARY_ISSUER_ID")
+  local auth=(--key "$KUME_NOTARY_KEY_PATH" --key-id "$KUME_NOTARY_KEY_ID" --issuer "$KUME_NOTARY_ISSUER_ID")
   # Submit first, then wait: `submit --wait` prints nothing when it times out, which
   # would lose the submission id.
   result="$(xcrun notarytool submit "$file" "${auth[@]}" --output-format json)" || true
   id="$(plutil -extract id raw -o - - <<<"$result" 2>/dev/null || true)"
   [[ -n "$id" ]] || { echo "notarization upload of $(basename "$file") failed: $result" >&2; exit 1; }
   echo "==> submitted $(basename "$file") for notarization (submission $id)"
-  result="$(xcrun notarytool wait "$id" "${auth[@]}" --timeout "${AIME_NOTARY_WAIT:-20m}" --output-format json 2>/dev/null)" || true
+  result="$(xcrun notarytool wait "$id" "${auth[@]}" --timeout "${KUME_NOTARY_WAIT:-20m}" --output-format json 2>/dev/null)" || true
   status="$(plutil -extract status raw -o - - <<<"$result" 2>/dev/null || true)"
   [[ -n "$status" ]] || status="$(xcrun notarytool info "$id" "${auth[@]}" --output-format json 2>/dev/null \
     | plutil -extract status raw -o - - 2>/dev/null || true)"
@@ -77,12 +77,12 @@ notarize() {  # <file>: 0 accepted, 2 still in progress; exits on rejection
   exit 1
 }
 
-AIME_RELEASE_VERSION="$VERSION" AIME_REQUIRE_TIMESTAMP=$([[ "$IDENTITY" == "-" ]] && echo 0 || echo 1) bash scripts/build-app.sh
-APP="$ROOT/build/Release/AIME.app"
+KUME_RELEASE_VERSION="$VERSION" KUME_REQUIRE_TIMESTAMP=$([[ "$IDENTITY" == "-" ]] && echo 0 || echo 1) bash scripts/build-app.sh
+APP="$ROOT/build/Release/KUME.app"
 
 rm -rf "$OUT" && mkdir -p "$OUT"
-PKG="$OUT/AIME-$VERSION.pkg"
-ZIP="$OUT/AIME-$VERSION.zip"
+PKG="$OUT/KUME-$VERSION.pkg"
+ZIP="$OUT/KUME-$VERSION.zip"
 
 if [[ "$NOTARIZE" == 1 ]]; then
   # Notarize and staple the app first so both the zip and the pkg carry the ticket.
@@ -97,7 +97,7 @@ if [[ "$NOTARIZE" == 1 ]]; then
 fi
 
 SKIP_BUILD=1 bash scripts/package.sh
-mv "dist/AIME-$APP_VERSION.pkg" "$PKG"
+mv "dist/KUME-$APP_VERSION.pkg" "$PKG"
 if [[ "$NOTARIZE" == 1 ]]; then
   if notarize "$PKG"; then
     xcrun stapler staple "$PKG"
@@ -108,7 +108,7 @@ if [[ "$NOTARIZE" == 1 ]]; then
 fi
 
 ditto -c -k --keepParent "$APP" "$ZIP"
-SRC="$OUT/AIME-$VERSION-source.tar.gz"
+SRC="$OUT/KUME-$VERSION-source.tar.gz"
 bash scripts/source-archive.sh "$VERSION" "$OUT"
 (cd "$OUT" && shasum -a 256 "$(basename "$PKG")" "$(basename "$ZIP")" "$(basename "$SRC")" > SHA256SUMS.txt)
 
@@ -127,7 +127,7 @@ SECTION="$(awk -v v="$VERSION" '
   if [[ -n "${SECTION//[[:space:]]/}" ]]; then
     printf '%s\n' "$SECTION"
   else
-    printf '## AIME %s\n\n更新内容见 [CHANGELOG.md](CHANGELOG.md)。\n' "$VERSION"
+    printf '## KUME %s\n\n更新内容见 [CHANGELOG.md](CHANGELOG.md)。\n' "$VERSION"
   fi
   echo
   echo "## 签名状态"
@@ -146,21 +146,21 @@ SECTION="$(awk -v v="$VERSION" '
 安装前先核对 SHA-256（见下文）。
 
 - **安装包 `.pkg`**：双击若被拦截，在 Finder 中右键 › 打开；新版 macOS 需到「系统设置 › 隐私与安全性」点「仍要打开」。
-  也可以只对这个文件去掉隔离属性：`xattr -d com.apple.quarantine AIME-*.pkg`。
-- **压缩包 `.zip`**：解压后把 `AIME.app` 放进 `~/Library/Input Methods/`，仅在信任该产物时执行
-  `xattr -dr com.apple.quarantine "$HOME/Library/Input Methods/AIME.app"`。不要关闭系统全局 Gatekeeper。
+  也可以只对这个文件去掉隔离属性：`xattr -d com.apple.quarantine KUME-*.pkg`。
+- **压缩包 `.zip`**：解压后把 `KUME.app` 放进 `~/Library/Input Methods/`，仅在信任该产物时执行
+  `xattr -dr com.apple.quarantine "$HOME/Library/Input Methods/KUME.app"`。不要关闭系统全局 Gatekeeper。
 MD
       ;;
   esac
   echo
-  echo "安装后在「系统设置 › 键盘 › 输入法」中添加「艾么输入法」；首次安装可能需要注销并重新登录一次。"
+  echo "安装后在「系统设置 › 键盘 › 输入法」中添加「酷米输入法」；首次安装可能需要注销并重新登录一次。"
   echo
   echo "## 许可与源码"
   echo
-  echo "AIME 原创代码采用 MIT。安装包包含 GPL-3.0 组件（librime-octagram 插件、雾凇拼音方案与 Lua 脚本），因此安装包整体按 GPL-3.0 条款分发；"
-  echo "对应源码见附件 \`AIME-$VERSION-source.tar.gz\`（AIME、librime、三个原生插件与雾凇拼音的固定版本，来源与哈希见包内 SOURCES.txt）。"
+  echo "KUME 原创代码采用 MIT。安装包包含 GPL-3.0 组件（librime-octagram 插件、雾凇拼音方案与 Lua 脚本），因此安装包整体按 GPL-3.0 条款分发；"
+  echo "对应源码见附件 \`KUME-$VERSION-source.tar.gz\`（KUME、librime、三个原生插件与雾凇拼音的固定版本，来源与哈希见包内 SOURCES.txt）。"
   echo
-  echo "最低系统：macOS 26。输入法与设置应用为 universal（Apple Silicon + Intel）；内置的 \`aime\` 命令行工具随构建机架构（当前为 Apple Silicon）。"
+  echo "最低系统：macOS 26。输入法与设置应用为 universal（Apple Silicon + Intel）；内置的 \`kume\` 命令行工具随构建机架构（当前为 Apple Silicon）。"
   echo
   echo "## SHA-256"
   echo

@@ -51,24 +51,24 @@ jobs:
 
       - name: Build package and stage plugins
         run: |
-          swift build --package-path Packages/AIMEKit
+          swift build --package-path Packages/KUMEKit
           bash scripts/stage-plugins.sh
 
       - name: Test package
-        run: swift test --package-path Packages/AIMEKit --no-parallel  # RimeEngine.shared is process-wide
+        run: swift test --package-path Packages/KUMEKit --no-parallel  # RimeEngine.shared is process-wide
 
       - name: Test license packaging
         run: python3 -m unittest discover -s scripts/tests -v
 
       - name: Build release CLI and stage plugins
         run: |
-          swift build --package-path Packages/AIMEKit -c release --product aime
+          swift build --package-path Packages/KUMEKit -c release --product kume
           bash scripts/stage-plugins.sh
 
       - name: Enforce benchmark latency
         run: |
-          "$(swift build --package-path Packages/AIMEKit -c release --show-bin-path)/aime" bench \
-            --user-dir "$RUNNER_TEMP/aime-bench" \
+          "$(swift build --package-path Packages/KUMEKit -c release --show-bin-path)/kume" bench \
+            --user-dir "$RUNNER_TEMP/kume-bench" \
             --shared-dir build/SharedSupport \
             --schema rime_ice --keys nihaoshijie --iterations 2000 --assert-p99-ms 5
 
@@ -116,8 +116,8 @@ jobs:
           APPLE_NOTARY_KEY_P8_BASE64: ${{ secrets.APPLE_NOTARY_KEY_P8_BASE64 }}
         run: |
           set -euo pipefail
-          SECRETS_DIR="$RUNNER_TEMP/aime-signing"
-          KEYCHAIN="$SECRETS_DIR/aime-signing.keychain-db"
+          SECRETS_DIR="$RUNNER_TEMP/kume-signing"
+          KEYCHAIN="$SECRETS_DIR/kume-signing.keychain-db"
           mkdir -p "$SECRETS_DIR" && chmod 700 "$SECRETS_DIR"
           KEYCHAIN_PASSWORD="$(openssl rand -base64 32)"
           echo "::add-mask::$KEYCHAIN_PASSWORD"
@@ -150,21 +150,21 @@ jobs:
           printf '%s' "$APPLE_NOTARY_KEY_P8_BASE64" | base64 --decode > "$SECRETS_DIR/AuthKey.p8"
           chmod 600 "$SECRETS_DIR/AuthKey.p8"
           {
-            echo "AIME_SIGN_IDENTITY=$app_id"
-            echo "AIME_INSTALLER_IDENTITY=$installer_id"
-            echo "AIME_NOTARY_KEY_PATH=$SECRETS_DIR/AuthKey.p8"
-            echo "AIME_NOTARY_KEY_ID=$APPLE_NOTARY_KEY_ID"
-            echo "AIME_NOTARY_ISSUER_ID=$APPLE_NOTARY_ISSUER_ID"
+            echo "KUME_SIGN_IDENTITY=$app_id"
+            echo "KUME_INSTALLER_IDENTITY=$installer_id"
+            echo "KUME_NOTARY_KEY_PATH=$SECRETS_DIR/AuthKey.p8"
+            echo "KUME_NOTARY_KEY_ID=$APPLE_NOTARY_KEY_ID"
+            echo "KUME_NOTARY_ISSUER_ID=$APPLE_NOTARY_ISSUER_ID"
           } >> "$GITHUB_ENV"
           echo "Imported Developer ID identities $app_id (application) and $installer_id (installer)"
 
       - name: Build, sign and package
         env:
           VERSION: ${{ steps.version.outputs.version }}
-          AIME_MANIFEST_KEY: ${{ secrets.AIME_MANIFEST_KEY }}
+          KUME_MANIFEST_KEY: ${{ secrets.KUME_MANIFEST_KEY }}
           # Shorten (e.g. 3m) while Apple holds submissions for review: the wait only
           # burns runner minutes; scripts/finish-notarization.sh staples later.
-          AIME_NOTARY_WAIT: ${{ vars.AIME_NOTARY_WAIT || '20m' }}
+          KUME_NOTARY_WAIT: ${{ vars.KUME_NOTARY_WAIT || '20m' }}
         run: bash scripts/release.sh "$VERSION"
 
       - name: Verify artefacts
@@ -174,20 +174,20 @@ jobs:
         run: |
           cd dist/release
           shasum -a 256 -c SHA256SUMS.txt
-          codesign --verify --deep --strict "$GITHUB_WORKSPACE/build/Release/AIME.app"
-          codesign -dv "$GITHUB_WORKSPACE/build/Release/AIME.app" 2>&1 | grep -E '^(Identifier|Authority|TeamIdentifier|Timestamp|Signature)=' || true
-          pkgutil --check-signature "AIME-$VERSION.pkg" || true
+          codesign --verify --deep --strict "$GITHUB_WORKSPACE/build/Release/KUME.app"
+          codesign -dv "$GITHUB_WORKSPACE/build/Release/KUME.app" 2>&1 | grep -E '^(Identifier|Authority|TeamIdentifier|Timestamp|Signature)=' || true
+          pkgutil --check-signature "KUME-$VERSION.pkg" || true
           status="$(cat SIGNING_STATUS)"
           if [[ "$status" == notarized ]]; then
-            spctl --assess --type install --verbose=2 "AIME-$VERSION.pkg"
-            xcrun stapler validate "AIME-$VERSION.pkg"
+            spctl --assess --type install --verbose=2 "KUME-$VERSION.pkg"
+            xcrun stapler validate "KUME-$VERSION.pkg"
           elif [[ "$status" == pending ]]; then
             echo "::warning::Apple notarization still in progress; staple later with scripts/finish-notarization.sh"
             cat NOTARY_PENDING.txt
           fi
           for manifest in latest.json latest-beta.json; do
             if [[ -f "$manifest.sig" ]]; then
-              swift "$GITHUB_WORKSPACE/scripts/sign-manifest.swift" verify "$manifest" "$(awk -F'"' '/manifestPublicKey =/ {print $2; exit}' "$GITHUB_WORKSPACE/Packages/AIMEKit/Sources/AIMECore/AppUpdate.swift")"
+              swift "$GITHUB_WORKSPACE/scripts/sign-manifest.swift" verify "$manifest" "$(awk -F'"' '/manifestPublicKey =/ {print $2; exit}' "$GITHUB_WORKSPACE/Packages/KUMEKit/Sources/KUMECore/AppUpdate.swift")"
             fi
           done
           prerelease=false
@@ -195,7 +195,7 @@ jobs:
           echo "status=$status" >> "$GITHUB_OUTPUT"
           echo "prerelease=$prerelease" >> "$GITHUB_OUTPUT"
           {
-            echo "### AIME $VERSION — $status"
+            echo "### KUME $VERSION — $status"
             echo '```'
             cat SHA256SUMS.txt
             echo '```'
@@ -204,11 +204,11 @@ jobs:
       - name: Upload artefacts
         uses: actions/upload-artifact@v4
         with:
-          name: AIME-${{ steps.version.outputs.version }}
+          name: KUME-${{ steps.version.outputs.version }}
           path: |
-            dist/release/AIME-*.pkg
-            dist/release/AIME-*.zip
-            dist/release/AIME-*-source.tar.gz
+            dist/release/KUME-*.pkg
+            dist/release/KUME-*.zip
+            dist/release/KUME-*-source.tar.gz
             dist/release/SHA256SUMS.txt
             dist/release/RELEASE_NOTES.md
             dist/release/latest*.json
@@ -221,9 +221,9 @@ jobs:
       - name: Delete temporary keychain and notary key
         if: always()
         run: |
-          SECRETS_DIR="$RUNNER_TEMP/aime-signing"
-          if [[ -f "$SECRETS_DIR/aime-signing.keychain-db" ]]; then
-            security delete-keychain "$SECRETS_DIR/aime-signing.keychain-db" || true
+          SECRETS_DIR="$RUNNER_TEMP/kume-signing"
+          if [[ -f "$SECRETS_DIR/kume-signing.keychain-db" ]]; then
+            security delete-keychain "$SECRETS_DIR/kume-signing.keychain-db" || true
           fi
           rm -rf "$SECRETS_DIR"
 
@@ -238,7 +238,7 @@ jobs:
       - name: Download artefacts
         uses: actions/download-artifact@v4
         with:
-          name: AIME-${{ needs.build.outputs.version }}
+          name: KUME-${{ needs.build.outputs.version }}
           path: dist
 
       - name: Create draft release
@@ -251,13 +251,13 @@ jobs:
         run: |
           cd dist
           shasum -a 256 -c SHA256SUMS.txt
-          title="AIME $VERSION"
+          title="KUME $VERSION"
           [[ "$STATUS" == preview ]] && title="$title（预览版，未签名）"
           [[ "$STATUS" == pending ]] && title="$title（公证处理中）"
           flags=(--draft --verify-tag --title "$title" --notes-file RELEASE_NOTES.md)
           [[ "$PRERELEASE" == true ]] && flags+=(--prerelease)
           gh release create "$TAG" --repo "$GITHUB_REPOSITORY" "${flags[@]}" \
-            "AIME-$VERSION.pkg" "AIME-$VERSION.zip" "AIME-$VERSION-source.tar.gz" SHA256SUMS.txt
+            "KUME-$VERSION.pkg" "KUME-$VERSION.zip" "KUME-$VERSION-source.tar.gz" SHA256SUMS.txt
 
       # get.zool.app serves zool-assets/<product>/releases/<version>/ and <product>/latest.json.
       # Versioned files go up every time; the manifest only for a notarized release, so
@@ -277,14 +277,14 @@ jobs:
           [[ -n "$AWS_ACCESS_KEY_ID" && -n "$AWS_SECRET_ACCESS_KEY" && -n "$R2_ENDPOINT" ]] \
             || { echo "::error::R2 credentials are not configured"; exit 1; }
           cd dist
-          for f in "AIME-$VERSION.pkg" "AIME-$VERSION.zip" "AIME-$VERSION-source.tar.gz" SHA256SUMS.txt; do
-            aws s3 cp "$f" "s3://zool-assets/aime/releases/$VERSION/$f" --endpoint-url "$R2_ENDPOINT" --only-show-errors
+          for f in "KUME-$VERSION.pkg" "KUME-$VERSION.zip" "KUME-$VERSION-source.tar.gz" SHA256SUMS.txt; do
+            aws s3 cp "$f" "s3://zool-assets/kume/releases/$VERSION/$f" --endpoint-url "$R2_ENDPOINT" --only-show-errors
           done
           if [[ "$STATUS" == notarized ]]; then
             for manifest in latest.json latest-beta.json; do
               [[ -f "$manifest" ]] || continue
-              aws s3 cp "$manifest.sig" "s3://zool-assets/aime/$manifest.sig" --endpoint-url "$R2_ENDPOINT" --content-type text/plain --only-show-errors
-              aws s3 cp "$manifest" "s3://zool-assets/aime/$manifest" --endpoint-url "$R2_ENDPOINT" --content-type application/json --only-show-errors
+              aws s3 cp "$manifest.sig" "s3://zool-assets/kume/$manifest.sig" --endpoint-url "$R2_ENDPOINT" --content-type text/plain --only-show-errors
+              aws s3 cp "$manifest" "s3://zool-assets/kume/$manifest" --endpoint-url "$R2_ENDPOINT" --content-type application/json --only-show-errors
               echo "published $manifest for $VERSION"
             done
           else

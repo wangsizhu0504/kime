@@ -1,7 +1,7 @@
 <p align="center">
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="assets/brand/aime/base-v1/lockup-white.png">
-    <img src="assets/brand/aime/base-v1/lockup-color.png" width="300" alt="AIME">
+    <source media="(prefers-color-scheme: dark)" srcset="assets/brand/kume/base-v1/lockup-white.png">
+    <img src="assets/brand/kume/base-v1/lockup-color.png" width="300" alt="KUME">
   </picture>
 </p>
 
@@ -10,45 +10,40 @@
 <p align="center">An open-source Chinese input method for macOS, built on RIME · local first · optional AI</p>
 
 <p align="center">
-  <a href="https://aime.zool.app/en/">Website</a> ·
-  <a href="https://github.com/zoolapp/aime/releases">Download</a> ·
-  <a href="https://aime.zool.app/en/docs/">Documentation</a> ·
+  <a href="https://aime.zool.app/en/">Upstream website</a> ·
+  <a href="https://github.com/wangsizhu0504/kime/releases">Download</a> ·
+  <a href="https://aime.zool.app/en/docs/">Upstream docs</a> ·
   <a href="docs/privacy.md">Privacy</a> ·
   <a href="README.md">中文</a>
 </p>
 
 <p align="center">
-  <a href="https://github.com/zoolapp/aime/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/zoolapp/aime/ci.yml?branch=main&style=flat-square&label=CI" alt="CI"></a>
-  <a href="https://github.com/zoolapp/aime/releases"><img src="https://img.shields.io/github/v/release/zoolapp/aime?include_prereleases&style=flat-square&label=release" alt="Release"></a>
+  <a href="https://github.com/wangsizhu0504/kime/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/wangsizhu0504/kime/ci.yml?branch=main&style=flat-square&label=CI" alt="CI"></a>
+  <a href="https://github.com/wangsizhu0504/kime/releases"><img src="https://img.shields.io/github/v/release/wangsizhu0504/kime?include_prereleases&style=flat-square&label=release" alt="Release"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-2f855a?style=flat-square" alt="MIT"></a>
   <img src="https://img.shields.io/badge/macOS-26%2B-111111?style=flat-square&logo=apple" alt="macOS 26+">
   <img src="https://img.shields.io/badge/Swift-6-F05138?style=flat-square&logo=swift&logoColor=white" alt="Swift 6">
   <img src="https://img.shields.io/badge/librime-1.17-B64032?style=flat-square" alt="librime 1.17">
 </p>
 
-<p align="center">
-  <img src="assets/social/2026-10-01/hero-v4.jpg" width="860" alt="AIME: New words, freely yours. Open source, privacy, an input method for the AI era. An angled laptop screen and keyboard show input interaction; a promotional composite based on native UI references, using synthetic examples.">
-</p>
-
 > [!IMPORTANT]
-> **Early release (0.1.x).** Features are still moving quickly. Stable installers are signed with a Developer ID and notarized by Apple; check the [release notes and checksums](https://github.com/zoolapp/aime/releases) before downloading. AIME is an independent project, not a fork of
-> Squirrel, contains none of its GPL source, and can be installed alongside it.
+> **KUME · 酷米输入法** is a renamed derivative of [AIME](https://github.com/zoolapp/aime), with upstream copyright and licenses preserved. It uses separate application identifiers and `~/Library/KUME/Rime`; existing AIME data is untouched. Build from source for now: KUME distribution signing, notarization, Homebrew packaging and update services are not configured. See [the rename notes](docs/renaming.md).
 
 ## Some words are better typed in quiet
 
 Voice input is useful. So is a keyboard: when you do not feel like speaking, when you share a space, or when you want to think as you write and take your time with a sentence.
 
-AIME is built for those moments. It keeps RIME's openness and flexibility, adds native controls for your typing habits, and brings in AI when you ask. There are no built-in ads; everyday input is processed on your Mac, and you choose your schemas, appearance and vocabulary.
+KUME is built for those moments. It keeps RIME's openness and flexibility, adds native controls for your typing habits, and brings in AI when you ask. There are no built-in ads; everyday input is processed on your Mac, and you choose your schemas, appearance and vocabulary.
 
-If you want to keep full or double pinyin and your own word lists while editing fewer configuration files, or value quiet writing and control over your tools, give AIME a try.
+If you want to keep full or double pinyin and your own word lists while editing fewer configuration files, or value quiet writing and control over your tools, give KUME a try.
 
-## Why AIME
+## Why KUME
 
 | | |
 |---|---|
-| **Open source, built on RIME** | Powered by [librime](https://github.com/rime/librime) with [rime-ice](https://github.com/iDvel/rime-ice) as the default schema. Reads your existing RIME configuration and imports from Squirrel read-only. AIME's own code is MIT-licensed. |
+| **Open source, built on RIME** | Powered by [librime](https://github.com/rime/librime) with [rime-ice](https://github.com/iDvel/rime-ice) as the default schema. Reads your existing RIME configuration and imports from Squirrel read-only. KUME's own code is MIT-licensed. |
 | **Everyday typing is processed on your Mac** | Composition, candidates and learned frequencies stay local: no input logs, built-in ads, telemetry or crash reporting. Snippets and optional input statistics are stored only on the Mac. |
-| **AI when you ask for it** | Translate, polish or run your own prompts — hold ⌥, press Space, done at the cursor. Only the text you choose is processed, by Apple's on-device model (availability depends on device and region) or an OpenAI-compatible endpoint you configure. Simplified/Traditional conversion runs locally. |
+| **AI when you ask for it** | Translate, polish or run your own prompts — hold ⌥, press Space, done at the cursor. Only the text you choose is processed, by the custom OpenAI-compatible endpoint and model saved in settings. Simplified/Traditional conversion runs locally. |
 | **Typing habits you can adjust** | Visual settings for schemas, colours and shortcuts; a native candidate window, snippet categories, phrase codes and a symbol board picked by letter keys keep everyday tasks at the keyboard. |
 | **Fresh vocabulary, an open ecosystem** | Official feeds support daily, weekly or manual checks and verify versions and SHA-256 before use. Subscribe to RIME-compatible word lists, install community schemas and import from Squirrel read-only. Credit goes to upstream maintainers and contributors. |
 
@@ -64,111 +59,83 @@ If you want to keep full or double pinyin and your own word lists while editing 
 - **Sentence scoring (optional)** — download the approximately 405 MB Wanxiang offline language model from Vocabulary, then enable it in typing settings. Disabled by default; scoring stays on the Mac.
 - **Snippets and phrases** — categorised snippets (phone, email, address…) and a table editor for custom phrases.
 - **Input statistics (optional, local only)** — daily characters, hours and apps, frequent words you can pin.
-- **Sync and backup** — merge learned frequencies across Macs through a RIME sync folder; export and restore a local backup file. AIME runs no sync server.
-- **Automatic updates** — checks a public release manifest once a day; downloads are verified against SHA-256 and the developer signature before macOS Installer opens them. Can be turned off.
+- **Sync and backup** — merge learned frequencies across Macs through a RIME sync folder; export and restore a local backup file. KUME runs no sync server.
+- **Automatic updates** — disabled until KUME has its own release service. Upstream AIME installers are rejected.
 - **First-run guide** — from enabling the input method to choosing full or double pinyin and trying sample phrases, step by step.
-- **CLI** — `aime deploy / bench / doctor / import-squirrel / package / get / set / sync` for scripting and CI.
-
-<p align="center">
-  <img src="assets/screenshots/settings-overview-light.png" width="860" alt="AIME Settings · Overview">
-</p>
-
-<p align="center">
-  <img src="assets/screenshots/settings-appearance-dark.png" width="49%" alt="Appearance (dark)">
-  <img src="assets/screenshots/settings-dictionaries-light.png" width="49%" alt="Vocabulary">
-</p>
+- **CLI** — `kume deploy / bench / doctor / import-squirrel / package / get / set / sync` for scripting and CI.
 
 ## Install
 
-### Homebrew
-
-```bash
-brew install --cask zoolapp/tap/aime
-```
-
-Then add the input method as in step 3 below. Upgrade with `brew upgrade --cask aime`.
-
-### Installer package
-
-1. Download the latest `AIME-<version>.pkg` from [Releases](https://github.com/zoolapp/aime/releases) and verify it with the `SHA256SUMS.txt` on the same page:
-
-   ```bash
-   shasum -a 256 -c SHA256SUMS.txt --ignore-missing
-   ```
-
-2. Read that release's signing and notarization status, then follow its installation instructions. Stable releases are notarized by Apple; a release labeled preview or “notarization in progress” is not. Check the release notes if macOS displays a security warning.
-3. Open **System Settings › Keyboard › Input Sources › Edit…**, click **+** and add **AIME** under Chinese, Simplified. If it does not appear after the first install, log out and back in.
-
 ### Build from source
 
-The app runs on Apple silicon and Intel Macs; the `aime` CLI is Apple silicon only for now.
+The app runs on Apple silicon and Intel Macs; the `kume` CLI is Apple silicon only for now.
 
 Building from source requires macOS 26+, Xcode 26+ and [XcodeGen](https://github.com/yonaskolb/XcodeGen) (`brew install xcodegen`).
 
 ```bash
-git clone https://github.com/zoolapp/aime.git && cd aime
+git clone https://github.com/wangsizhu0504/kime.git kume && cd kume
 bash scripts/install-dev.sh
 ```
 
-The script downloads and verifies pinned librime and rime-ice releases, builds the input method, the settings app and the CLI, installs to `~/Library/Input Methods/AIME.app` and registers it.
+The script downloads and verifies pinned librime and rime-ice releases, builds the input method, the settings app and the CLI, installs to `~/Library/Input Methods/KUME.app` and registers it.
 
 ## Migrating from Squirrel
 
 1. Run "Sync user data" once in Squirrel so the frequency snapshots are current.
-2. In AIME Settings, choose Import on the Overview page, or use the CLI:
+2. In KUME Settings, choose Import on the Overview page, or use the CLI:
 
    ```bash
-   ~/Library/Input\ Methods/AIME.app/Contents/Helpers/aime import-squirrel --dry-run   # preview
-   ~/Library/Input\ Methods/AIME.app/Contents/Helpers/aime import-squirrel
+   ~/Library/Input\ Methods/KUME.app/Contents/Helpers/kume import-squirrel --dry-run   # preview
+   ~/Library/Input\ Methods/KUME.app/Contents/Helpers/kume import-squirrel
    ```
 
-The import is read-only — `~/Library/Rime` is never modified. Your `*.custom.yaml` files are kept as they are in `~/Library/AIME/Rime/aime/imported/`; changes made in the app live in a separate layer that takes precedence and can be reset at any time.
+The import is read-only — `~/Library/Rime` is never modified. Your `*.custom.yaml` files are kept as they are in `~/Library/KUME/Rime/kume/imported/`; changes made in the app live in a separate layer that takes precedence and can be reset at any time.
 
 ## Architecture
 
 ```mermaid
 flowchart LR
-  subgraph IME["AIME.app · input method process"]
+  subgraph IME["KUME.app · input method process"]
     C[IMKit controller] --> R[librime 1.17<br/>+ lua / octagram / predict]
     C --> P[Candidate window · AppKit]
   end
-  S["AIME Settings.app · SwiftUI"] -- writes config layers --> U[(~/Library/AIME/Rime)]
+  S["KUME Settings.app · SwiftUI"] -- writes config layers --> U[(~/Library/KUME/Rime)]
   S -- deploy request --> IME
   R --> U
   Sq[(~/Library/Rime · read-only)] -. import .-> U
 ```
 
-The settings app does not link librime; it reads and writes files and asks the input method to redeploy through distributed notifications. Every setting is composed from three layers: AIME defaults → hand-written patches → changes made in the app. See [Architecture](docs/architecture.md) and the [decision records](docs/decisions/).
+The settings app does not link librime; it reads and writes files and asks the input method to redeploy through distributed notifications. Every setting is composed from three layers: KUME defaults → hand-written patches → changes made in the app. See [Architecture](docs/architecture.md) and the [decision records](docs/decisions/).
 
 ## Development
 
 ```bash
 bash scripts/fetch-librime.sh && bash scripts/fetch-dicts.sh
-swift build --package-path Packages/AIMEKit && bash scripts/stage-plugins.sh
-swift test --package-path Packages/AIMEKit
-xcodegen generate && open AIME.xcodeproj
+swift build --package-path Packages/KUMEKit && bash scripts/stage-plugins.sh
+swift test --package-path Packages/KUMEKit
+xcodegen generate && open KUME.xcodeproj
 ```
 
-Performance gate: `aime bench --schema rime_ice --keys nihaoshijie --iterations 2000 --assert-p99-ms 5`.
+Performance gate: `kume bench --schema rime_ice --keys nihaoshijie --iterations 2000 --assert-p99-ms 5`.
 See [CONTRIBUTING.md](CONTRIBUTING.md) for contributing, [docs/releasing.md](docs/releasing.md) for releases, and report security issues privately as described in [SECURITY.md](SECURITY.md).
 
 ## Documentation and participation
 
-The [documentation index](docs/README.md) collects usage, configuration, development and distribution guides. Report reproducible problems in [Issues](https://github.com/zoolapp/aime/issues), read the [contribution guide](CONTRIBUTING.md) for code changes, and contribute public word lists to [aime-dicts](https://github.com/zoolapp/aime-dicts). Share schemas, themes and typing habits using synthetic examples; keep personal word frequencies and full configuration directories out of reports.
+The [documentation index](docs/README.md) collects usage, configuration, development and distribution guides. Report reproducible problems in [Issues](https://github.com/wangsizhu0504/kime/issues), read the [contribution guide](CONTRIBUTING.md) for code changes, and contribute public word lists to [aime-dicts](https://github.com/zoolapp/aime-dicts). Share schemas, themes and typing habits using synthetic examples; keep personal word frequencies and full configuration directories out of reports.
 
 ## Privacy
 
-Input is processed on your Mac; AIME writes no input logs, never uploads pinyin, candidates or learned frequencies, and ships no analytics or crash-reporting SDKs. Subscribed online vocabularies are fetched from their public URLs at the interval you choose; the update check fetches a public release manifest once a day (can be turned off).
-Text reaches an AI model only when you run an AI action: Apple's on-device model runs locally but depends on device, settings and region (currently unavailable for devices or Apple accounts from mainland China); a cloud endpoint you configure yourself must be explicitly allowed to receive text and may be billed by its provider. See [Privacy](docs/privacy.md).
+Input is processed on your Mac; KUME writes no input logs, never uploads pinyin, candidates or learned frequencies, and ships no analytics or crash-reporting SDKs. Subscribed online vocabularies are fetched from their public URLs at the interval you choose; KUME update checks are not enabled.
+Text reaches an AI model only when you run an AI action. Configure your own endpoint, model and API key in settings and explicitly allow it to receive input-action text. The provider may charge for requests. See [Privacy](docs/privacy.md).
 
 ## Roadmap
 
 - [x] librime frontend, candidate window, CLI, developer install and CI
 - [x] Visual settings, appearance preview, per-app options, snippets and custom phrases
 - [x] Official online vocabulary catalogue, schema packages (pinned versions, SHA-256)
-- [x] Quick menu, AI actions (on-device / bring your own endpoint), draft layer
+- [x] Quick menu, AI actions (custom provider), draft layer
 - [x] Input statistics, first-run guide, local backup and restore
-- [x] Developer ID signing, notarization and automatic updates
+- [ ] Configure KUME Developer ID signing, notarization and automatic updates
 - [ ] Vertical text orientation, candidate paging indicator
 - [ ] Reproducible librime builds from source
 
@@ -178,10 +145,8 @@ Text reaches an AI model only when you run an AI action: Apple's on-device model
 
 ## License
 
-AIME's original code is released under the [MIT License](LICENSE). The installer also contains GPL-3.0 components — the native `librime-octagram` plugin and the rime-ice schemas, word lists and Lua scripts —
+KUME's original code is released under the [MIT License](LICENSE). The installer also contains GPL-3.0 components — the native `librime-octagram` plugin and the rime-ice schemas, word lists and Lua scripts —
 so **the installer as a whole is distributed under the terms of GPL-3.0**, while the original source stays MIT (MIT is GPL-compatible). Every release ships the corresponding source archive.
-AIME's online word lists are CC BY 4.0. Other third-party components are listed in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md), and the native plugin licence review is in [docs/native-plugin-license-audit.md](docs/native-plugin-license-audit.md).
+Upstream AIME word lists are CC BY 4.0. Other third-party components are listed in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md), and the native plugin licence review is in [docs/native-plugin-license-audit.md](docs/native-plugin-license-audit.md).
 
-<p align="center"><sub>Published and maintained by <a href="https://zool.app">ZOOL LLC</a> · Developed by Luo Lei (<a href="https://github.com/foru17">@foru17</a>) · AIME and 艾么输入法 are product names of ZOOL LLC</sub></p>
-
-For troubleshooting and diagnostic exports, see the [troubleshooting guide (Chinese)](docs/troubleshooting.md).
+<p align="center"><sub>Based on AIME by ZOOL LLC / Luo Lei, with upstream copyright and licenses preserved. KUME / 酷米输入法 is the name of this derivative project.</sub></p>

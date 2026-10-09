@@ -1,8 +1,8 @@
-# RIME 配置项权威参考（AIME 调研文档）
+# RIME 配置项权威参考（KUME 调研文档）
 
-> 适用对象：AIME（基于 librime 的 macOS 输入法 + 可视化配置 App）。
+> 适用对象：KUME（基于 librime 的 macOS 输入法 + 可视化配置 App）。
 > 事实来源：本机 `~/Library/Rime/` 真实用户配置（雾凇拼音 rime_ice 2025-11-02 版、小鹤双拼方案）、Squirrel 1.1.2 自带 `SharedSupport/` 配置、Rime 官方 Wiki（Configuration / CustomizationGuide / RimeWithSchemata / SpellingAlgebra）、LEOYoon-Tsaw《Rime_description》、librime-lua Wiki。
-> 每节末尾用 `catalog: <id>` 标注本文件与 `config/catalog.json` 的交叉引用；「AIME 可视化」标注该项是否已被可视化目录收录（未收录者走「高级 YAML」直接编辑补丁文件）。
+> 每节末尾用 `catalog: <id>` 标注本文件与 `config/catalog.json` 的交叉引用；「KUME 可视化」标注该项是否已被可视化目录收录（未收录者走「高级 YAML」直接编辑补丁文件）。
 
 ## 文件体系与加载顺序
 
@@ -22,11 +22,11 @@ SharedSupport/xxx.yaml  →  ~/Library/Rime/xxx.yaml  →  ~/Library/Rime/xxx.cu
 
 - **default.yaml**：全局默认（schema_list、menu、switcher、ascii_composer、punctuator、recognizer、key_binder）。
 - **schema（`<方案名>.schema.yaml`）**：输入方案本体，引用 default 的预设（`import_preset: default`）并可覆盖任何键。
-- **前端（`squirrel.yaml` / AIME 的 `aime.yaml`）**：外观与应用级选项，键结构与 squirrel.yaml 相同。
+- **前端（`squirrel.yaml` / KUME 的 `kume.yaml`）**：外观与应用级选项，键结构与 squirrel.yaml 相同。
 
 本机实际生效链举例：`default.custom.yaml` 把 `menu/page_size` 从 5 改成 9、`schema_list` 精简为 `[rime_ice, double_pinyin_flypy]`；`squirrel.custom.yaml` 把配色改为 `mac_light` / `mac_dark`。
 
-AIME 可视化：已收录（加载顺序为只读知识；可视化写入的是 `aime.yaml` 与各 `*.custom.yaml`）。
+KUME 可视化：已收录（加载顺序为只读知识；可视化写入的是 `kume.yaml` 与各 `*.custom.yaml`）。
 catalog: menu.page_size, switches.emoji
 
 ## 编译内嵌与补丁语法（__include / __patch / __append / __merge）
@@ -63,7 +63,7 @@ patch:
 
 补丁路径中的高级写法（librime ≥ 1.x 支持）：`/+` 追加列表元素、`/@3` 或 `/@last` 定位列表第 N 项（如 `switches/@3/reset: 1` 修改第 4 个开关的默认值）。注意 `patch` 对**列表整体替换**——`rime_ice.custom.yaml` 重写 `speller/algebra` 时必须把原方案的全部规则复制一遍再增删，不能只写增量。
 
-AIME 可视化：高级 YAML（可视化目录只写扁平键值，多规则场景引导用户编辑 `*.custom.yaml`）。
+KUME 可视化：高级 YAML（可视化目录只写扁平键值，多规则场景引导用户编辑 `*.custom.yaml`）。
 catalog: switches.emoji, spelling.jianpin
 
 ## 部署流程与 installation.yaml / user.yaml
@@ -95,7 +95,7 @@ var:
     double_pinyin_flypy: 1726647766
 ```
 
-AIME 可视化：高级 YAML（deployment 由 librime 触发；`sync_dir` 计划放入「高级」页）。
+KUME 可视化：高级 YAML（deployment 由 librime 触发；`sync_dir` 计划放入「高级」页）。
 catalog: —（installation.yaml 暂无可视化项）
 
 ## Schema 元信息
@@ -119,7 +119,7 @@ schema:
 
 要点：`schema_id` 决定 build/ 产物文件名与用户词典名（`<schema_id>.userdb`）；`dependencies` 中的方案可以先部署，本方案通过 `table_translator@xxx` + 独立词典引用它们。多方案共库时（小鹤双拼 `dictionary: rime_ice`）必须设 `prism: double_pinyin_flypy` 隔离用户词典。
 
-AIME 可视化：已收录（方案列表读写 `default:/schema_list`）。
+KUME 可视化：已收录（方案列表读写 `default:/schema_list`）。
 catalog: general.schema_list
 
 ## switches 开关
@@ -146,7 +146,7 @@ switches:
 
 规则：`name` 与 `options`（多选一）二选一——`name` 是二态开关，`options` 是多选（如明月拼音的 `zh_hans/zh_hant/zh_hant_tw`）；`reset` 是部署后的初始状态索引；`states`/`abbrev` 决定菜单显示；`switcher/save_options` 列出的开关会被记忆（见 switcher 节）。opencc 类开关（traditionalization、emoji）由 `simplifier@xxx` 的 `option_name` 关联消费。
 
-AIME 可视化：已收录（常用开关默认值做成 bool）。
+KUME 可视化：已收录（常用开关默认值做成 bool）。
 catalog: switches.emoji, switches.traditionalization, switches.full_shape, switches.ascii_punct, switches.search_single_char
 
 ## engine 总览
@@ -186,7 +186,7 @@ engine:
 
 语法要点：`@名字` 挂载具名组件（配置写在顶层同名节点，如 `table_translator@custom_phrase` 读 `custom_phrase:` 节点）；lua 组件用 `lua_xxx@*脚本名`，`*` 表示全局命名空间（所有方案共享，雾凇推荐），`@脚本名@名字空间` 可带独立配置。顺序敏感：processors 中越靠后优先级越低；filters 中越靠前越先看到候选。
 
-AIME 可视化：高级 YAML（流水线结构不开放编辑；翻译器参数见下两节）。
+KUME 可视化：高级 YAML（流水线结构不开放编辑；翻译器参数见下两节）。
 catalog: translator.initial_quality, translator.enable_word_completion
 
 ## processors 处理器
@@ -203,7 +203,7 @@ catalog: translator.initial_quality, translator.enable_word_completion
 - **express_editor / fluid_editor**：编辑已确认的句段。express_editor 直接上屏已确认部分；fluid_editor（旧称）行为不同，雾凇等现代方案统一用 express_editor。
 - **lua_processor@\*select_character**：以词定字（按 `[`/`]` 取候选首/尾字）。
 
-AIME 可视化：已收录（以词定字键、翻页键；其余高级 YAML）。
+KUME 可视化：已收录（以词定字键、翻页键；其余高级 YAML）。
 catalog: key_binder.select_first_character, key_binder.select_last_character, keys.paging_minus_equal
 
 ## segmentors 分段器
@@ -219,7 +219,7 @@ catalog: key_binder.select_first_character, key_binder.select_last_character, ke
 
 一般无需调整；新增「xx 模式」时需在 recognizer、segmentors、translators 三处配套注册。
 
-AIME 可视化：高级 YAML（仅暴露 v 模式前缀）。
+KUME 可视化：高级 YAML（仅暴露 v 模式前缀）。
 catalog: recognizer.punct_prefix
 
 ## translators 翻译器
@@ -234,7 +234,7 @@ catalog: recognizer.punct_prefix
 - **history_translator**：最近上屏内容重复输入。
 - **lua_translator@\*…**：Lua 脚本翻译器，本机挂载了 date_translator、lunar、uuid、unicode、number_translator、calc_translator、force_gc（见 Lua 节）。
 
-AIME 可视化：部分已收录（主翻译器参数）。
+KUME 可视化：部分已收录（主翻译器参数）。
 catalog: translator.enable_word_completion, translator.spelling_hints, translator.always_show_comments, translator.initial_quality, translator.contextual_suggestions
 
 ## translators 常用参数
@@ -257,7 +257,7 @@ catalog: translator.enable_word_completion, translator.spelling_hints, translato
 | `contextual_suggestions` | 跨句上下文选词（octagram），独立于当前整句评分 | 万象 v18.0.15 预设 false |
 | `max_homophones` / `max_homographs` | 语言模型同音/同形候选上限 | 7 / 7 |
 
-语言模型（octagram grammar）可用于全拼或双拼。AIME 在设置中选择模型时写入当前主方案的 generated 层，补齐缺失参数，并保留已有参数。对应的有效配置如下（万象 v18.0.15 预设）：
+语言模型（octagram grammar）可用于全拼或双拼。KUME 在设置中选择模型时写入当前主方案的 generated 层，补齐缺失参数，并保留已有参数。对应的有效配置如下（万象 v18.0.15 预设）：
 
 ```yaml
 grammar:
@@ -272,11 +272,11 @@ translator:
   contextual_suggestions: false
 ```
 
-「词库 → 整句语言模型」提供可选万象 LTS 简体模型，约 398 MB；默认不下载、不启用。上游会原地替换 LTS 附件，注册表因此固定 AIME 在 assets.zool.app 上的原样副本（2026-10-06 发布的 LTS）与 SHA-256，安装时使用文件下载与分块校验，模型由 [RIME-LMDG](https://github.com/amzxyz/RIME-LMDG) 提供，CC BY 4.0。输入、候选和用户词频不参与下载请求；评分在本机完成。
+「词库 → 整句语言模型」提供可选万象 LTS 简体模型，约 398 MB；默认不下载、不启用。上游会原地替换 LTS 附件，注册表因此固定 KUME 在 assets.zool.app 上的原样副本（2026-10-06 发布的 LTS）与 SHA-256，安装时使用文件下载与分块校验，模型由 [RIME-LMDG](https://github.com/amzxyz/RIME-LMDG) 提供，CC BY 4.0。输入、候选和用户词频不参与下载请求；评分在本机完成。
 
 12 条固定合成句的真实 librime 比较中，首选匹配从 9/12 到 11/12，2 条改善、0 条退化；这只是小样本回归，不代表普遍准确率。见 [验收记录](input-improvements-2026-10-05.md)。此功能改善当前整句评分；后续词预测还需要经过来源与许可验证的独立预测词表。
 
-AIME 可视化：已收录（主翻译器 4 项 + 语法模型开关）。
+KUME 可视化：已收录（主翻译器 4 项 + 语法模型开关）。
 catalog: translator.enable_word_completion, translator.spelling_hints, translator.always_show_comments, translator.initial_quality, translator.contextual_suggestions, grammar.language
 
 ## filters 过滤器
@@ -284,13 +284,13 @@ catalog: translator.enable_word_completion, translator.spelling_hints, translato
 对候选流做转换/排序/过滤，按列表顺序执行：
 
 - **simplifier@xxx**：OpenCC 简繁/emoji 转换。`simplifier@emoji`（option_name: emoji，opencc_config: emoji.json，inherit_comment: false）把候选经 emoji 映射多一份；`simplifier@traditionalize`（option_name: traditionalization，opencc_config: s2t.json，可选 s2hk/s2tw/s2twp，tips: none，tags 限定作用段）实现繁体输出。
-  catalog: traditionalize.opencc_config（设置 › 输入习惯 › 简繁体 › 繁体标准）。「默认输出」简体/繁体不写配置：AIME 在每个新会话上设置 `traditionalization` 开关（`aime/features.json` 的 `traditional`）。
+  catalog: traditionalize.opencc_config（设置 › 输入习惯 › 简繁体 › 繁体标准）。「默认输出」简体/繁体不写配置：KUME 在每个新会话上设置 `traditionalization` 开关（`kume/features.json` 的 `traditional`）。
 - **uniquifier**：去除完全相同的候选（一般放在 filters 最后）。
 - **charset_filter**（librime 内置，需配合 extended_charset 开关）：过滤字符集外汉字，雾凇未用（以 8105 字表词库代替）。
 - **single_char_filter**：只留单字候选（雾凇用 `search_single_char` 开关 + search.lua 实现类似能力，未用内置组件）。
 - **lua_filter@\*…**：本机挂载——corrector（错音提示）、autocap_filter（英文大写）、v_filter（v 模式符号优先）、pin_cand_filter（置顶候选）、long_word_filter（长词优先）、reduce_english_filter（英文降频）、search@radical_pinyin（辅码过滤）。
 
-AIME 可视化：部分已收录（置顶/长词/英文降频为高级 YAML；emoji、繁体走 switches）。
+KUME 可视化：部分已收录（置顶/长词/英文降频为高级 YAML；emoji、繁体走 switches）。
 catalog: switches.emoji, switches.traditionalization
 
 ## speller 与拼写运算 algebra
@@ -327,7 +327,7 @@ speller:
 
 注意：custom patch 替换 `algebra` 是整个列表替换；改动后必须重新部署（词典需按新拼写重编译）。
 
-AIME 可视化：已收录（常用模糊音/简拼做成 bool 开关，自动注入 algebra 规则）。
+KUME 可视化：已收录（常用模糊音/简拼做成 bool 开关，自动注入 algebra 规则）。
 catalog: spelling.fuzzy.zh_z, spelling.fuzzy.z_zh, spelling.fuzzy.n_l, spelling.fuzzy.l_n, spelling.fuzzy.f_h, spelling.fuzzy.h_f, spelling.fuzzy.en_eng, spelling.fuzzy.in_ing, spelling.jianpin, spelling.uv_compat, spelling.auto_correct
 
 ## punctuator 与 symbols 符号表
@@ -345,7 +345,7 @@ full_shape:
 - **symbols 表**：v 模式符号。雾凇 `punctuator/symbols: __include: symbols_v:/symbols`，条目形如 `'vsz': [ ⚀⚁⚂⚃⚄⚅ ]`、`'va': [ā, á, ǎ, à]`；配合 `recognizer/patterns/punct: "^v([0-9]|10|[A-Za-z]+)$"`（把默认 `/` 前缀改为 v；双拼方案用 symbols_caps_v.yaml 的大写 V 避免与编码冲突）。
 - 全局 default.yaml 内联了完整 full/half_shape（如 `,`→`，`、`[`→`[ 「, 【, 〔, ［ ]`、`'`→pair 引号）；Squirrel 出厂版则 `__include: punctuation:/full_shape`。
 
-AIME 可视化：部分已收录（digit_separators；符号表本体为高级 YAML）。
+KUME 可视化：部分已收录（digit_separators；符号表本体为高级 YAML）。
 catalog: punctuator.digit_separators
 
 ## key_binder 按键绑定
@@ -367,10 +367,10 @@ key_binder:
 - **以词定字**：`key_binder/select_first_character: bracketleft`、`select_last_character: grave`（本机 custom 把尾字键从 `]` 改成了 `` ` ``），由 lua_processor@select_character 消费。
 - 出厂预设集中在 `key_bindings.yaml`：emacs_editing、paging_with_minus_equal、paging_with_comma_period、paging_with_brackets、numbered_mode_switch、windows_compatible_mode_switch 等，用 `bindings/__patch: key_bindings:/xxx` 引入。
 
-AIME 可视化：已收录（翻页方式、以词定字、开关切换热键）。
+KUME 可视化：已收录（翻页方式、以词定字、开关切换热键）。
 catalog: key_binder.select_first_character, key_binder.select_last_character, keys.paging_minus_equal, keys.paging_comma_period, keys.paging_brackets, keys.toggle_ascii_punct, keys.toggle_traditionalization, keys.tab_move_by_word
 
-设置 › 快捷键 › 快捷菜单：长按触发键（Option / Control / Command / 关闭，约 0.35 秒）保存到 `aime/features.json` 的 `menuHoldKey`，即时通知输入法读取，不写 RIME 按键绑定。固定组合键为 ⌃⌥M；候选窗菜单按钮是否显示仍在外观设置。设置 › 快捷键 › 方案选单：`switcher.hotkeys`（原来位于输入习惯），ID、默认值与 `switcher/hotkeys` 写入方式保持不变。
+设置 › 快捷键 › 快捷菜单：长按触发键（Option / Control / Command / 关闭，约 0.35 秒）保存到 `kume/features.json` 的 `menuHoldKey`，即时通知输入法读取，不写 RIME 按键绑定。固定组合键为 ⌃⌥M；候选窗菜单按钮是否显示仍在外观设置。设置 › 快捷键 › 方案选单：`switcher.hotkeys`（原来位于输入习惯），ID、默认值与 `switcher/hotkeys` 写入方式保持不变。
 
 ## ascii_composer 中西文切换
 
@@ -398,7 +398,7 @@ ascii_composer:
 
 `good_old_caps_lock: true` 时 CapsLock 表现为老式大写锁（按下即西文）；false 时 CapsLock 进入「首字母大写模式」，回车上屏后自动回中文。
 
-AIME 可视化：已收录。
+KUME 可视化：已收录。
 catalog: ascii_composer.good_old_caps_lock, ascii_composer.caps_lock, ascii_composer.shift_l, ascii_composer.shift_r, ascii_composer.control_l, ascii_composer.control_r
 
 ## switcher 方案选单
@@ -421,11 +421,11 @@ switcher:
 ```
 
 - `hotkeys`：唤出方案选单的热键列表。
-- `caption`：打开方案选单时的提示文字，RIME 将它放在组字区。AIME 跟随「内联预编辑」及应用覆盖设置，在输入框或候选窗显示；开启候选内联预上屏时，候选预览可能替代这段提示。可视化名称为「方案选单提示文字」，默认内容仍是 `「方案选单」`。
+- `caption`：打开方案选单时的提示文字，RIME 将它放在组字区。KUME 跟随「内联预编辑」及应用覆盖设置，在输入框或候选窗显示；开启候选内联预上屏时，候选预览可能替代这段提示。可视化名称为「方案选单提示文字」，默认内容仍是 `「方案选单」`。
 - `save_options`：列出的开关状态会被记忆到用户词典，重启/切方案后保持；不在列表中的开关每次回到 `reset` 值。
 - `fold_options` / `abbreviate_options`：控制选单中开关的折叠与缩写显示。
 
-AIME 可视化：已收录。
+KUME 可视化：已收录。
 catalog: switcher.hotkeys, switcher.save_options, switcher.fold_options, switcher.caption
 
 ## menu 候选菜单
@@ -441,7 +441,7 @@ menu:
 - `alternative_select_keys`：除数字外的第二组选词键（stringList 逐字符）。
 - `alternative_select_labels`：候选前的序号显示字符。
 
-AIME 可视化：已收录。
+KUME 可视化：已收录。
 catalog: menu.page_size, menu.alternative_select_keys
 
 ## recognizer 模式识别
@@ -472,7 +472,7 @@ recognizer:
 
 每个模式通常三件套：pattern（打 tag）→ affix/matcher segmentor（分段）→ 对应 translator（产出候选）。双拼方案把 punct 改为大写 `^V…$` 避开编码。
 
-AIME 可视化：高级 YAML（punct 前缀为计划项）。
+KUME 可视化：高级 YAML（punct 前缀为计划项）。
 catalog: recognizer.punct_prefix
 
 ## 词典 dict.yaml 与 custom_phrase
@@ -509,7 +509,7 @@ Amazon	amazon
 
 格式 `词汇<Tab>编码<Tab>权重`（权重可省）。配置侧：`table_translator@custom_phrase` 设 `user_dict: custom_phrase`、`db_class: stabledb`（只读、不调频；改 tabledb 可调频）、`initial_quality: 99`（压过一切候选）。双拼方案改用 `custom_phrase_double.txt`。
 
-AIME 可视化：部分已收录（custom_phrase 计划做编辑器；词库管理为高级 YAML）。
+KUME 可视化：部分已收录（custom_phrase 计划做编辑器；词库管理为高级 YAML）。
 catalog: advanced.custom_phrase_path
 
 ## userdb 用户词典与同步
@@ -521,12 +521,12 @@ catalog: advanced.custom_phrase_path
 - 同步是「快照合并」而非实时同步：词频按设备合并取最新/最高，删除不传播（librime 同步语义）。
 - 本机 `sync/d523dbf9-…/` 内除 userdb 快照外还备份了 schema/custom_phrase 等配置文件。
 
-AIME 可视化：高级 YAML（sync_dir 写入 installation.yaml，不属 default/schema/frontend 三类，故不入目录）。
+KUME 可视化：高级 YAML（sync_dir 写入 installation.yaml，不属 default/schema/frontend 三类，故不入目录）。
 catalog: —（installation.yaml 暂无可视化项）
 
 ## 前端 squirrel.yaml：style 外观
 
-AIME 的前端配置文件为 `aime.yaml`，键结构与 `squirrel.yaml` 完全相同（本节以 squirrel 为准）。顶层键：`config_version`（须高于出厂版本才生效）、`keyboard_layout: last`（last/default/布局 ID）、`chord_duration: 0.1`（和弦秒数）、`show_notifications_when: appropriate`（always/never/appropriate）、`style`、`preset_color_schemes`、`app_options`。
+KUME 的前端配置文件为 `kume.yaml`，键结构与 `squirrel.yaml` 完全相同（本节以 squirrel 为准）。顶层键：`config_version`（须高于出厂版本才生效）、`keyboard_layout: last`（last/default/布局 ID）、`chord_duration: 0.1`（和弦秒数）、`show_notifications_when: appropriate`（always/never/appropriate）、`style`、`preset_color_schemes`、`app_options`。
 
 `style:` 全字段（出厂默认 + 实际用法）：
 
@@ -542,10 +542,10 @@ AIME 的前端配置文件为 `aime.yaml`，键结构与 `squirrel.yaml` 完全�
 | `translucency` | false | 半透明毛玻璃 |
 | `show_paging` | false | 显示翻页指示 |
 | `corner_radius` | 7 | 候选窗圆角（配色方案里的同名键优先） |
-| `aime/max_width` | 640 | **AIME 扩展**：候选窗最大宽度（点）。只约束长候选：单个候选超出时以省略号截断，含长候选的一页超出时换行；普通候选（每个不超过该值的 1/3）一页始终一行，仅受屏幕宽度 90% 限制；0 表示单个候选仅受屏幕宽度 60% 限制（参考 Weasel `max_width`） |
-| `aime/corner_radius` | 10 | **AIME 扩展**：优先于配色方案的圆角；设置 App 的「候选窗圆角」写这里，0 为直角。未设置时圆角不低于 8pt（高亮不低于 5pt） |
+| `kume/max_width` | 640 | **KUME 扩展**：候选窗最大宽度（点）。只约束长候选：单个候选超出时以省略号截断，含长候选的一页超出时换行；普通候选（每个不超过该值的 1/3）一页始终一行，仅受屏幕宽度 90% 限制；0 表示单个候选仅受屏幕宽度 60% 限制（参考 Weasel `max_width`） |
+| `kume/corner_radius` | 10 | **KUME 扩展**：优先于配色方案的圆角；设置 App 的「候选窗圆角」写这里，0 为直角。未设置时圆角不低于 8pt（高亮不低于 5pt） |
 | `hilited_corner_radius` | 0 | 高亮候选圆角 |
-| `aime/hilited_corner_radius` | 6 | **AIME 扩展**：优先于配色方案的高亮圆角 |
+| `kume/hilited_corner_radius` | 6 | **KUME 扩展**：优先于配色方案的高亮圆角 |
 | `surrounding_extra_expansion` | 0 | 高亮块四周额外扩张 |
 | `border_height` / `border_width` | -2 | 边框高/宽（负值为内缩） |
 | `line_spacing` | 5 | 候选行距 |
@@ -558,7 +558,7 @@ AIME 的前端配置文件为 `aime.yaml`，键结构与 `squirrel.yaml` 完全�
 | `comment_font_face` / `comment_font_point` | 同上 | 注释字体 |
 | `candidate_format` | `'[label]. [candidate] [comment]'` | 候选格式串；现代写法 `"%c\u2005%@\u2005"`（%c=候选 %@=注释） |
 
-AIME 可视化：已收录（appearance 组全部 style 字段）。
+KUME 可视化：已收录（appearance 组全部 style 字段）。
 catalog: appearance.color_scheme, appearance.color_scheme_dark, appearance.candidate_list_layout, appearance.text_orientation, appearance.inline_preedit, appearance.inline_candidate, appearance.corner_radius, appearance.hilited_corner_radius, appearance.max_width, appearance.border_height, appearance.border_width, appearance.line_spacing, appearance.spacing, appearance.base_offset, appearance.shadow_size, appearance.alpha, appearance.translucency, appearance.mutual_exclusive, appearance.memorize_size, appearance.show_paging, appearance.font_face, appearance.font_point, appearance.label_font_face, appearance.label_font_point, appearance.comment_font_face, appearance.comment_font_point, appearance.candidate_format
 
 ## preset_color_schemes 配色方案
@@ -590,16 +590,16 @@ solarized_light:
 
 **颜色格式（重要）**：`0x` 前缀十六进制，**顺序为 BGR**——24 位 `0xBBGGRR`，32 位 `0xAABBGGRR`（A=alpha）。即文件注释所称「BGR顺序」，与常见 RGB 相反；写可视化取色器时必须做通道转换。（部分第三方主题沿用 weasel 键名 horizontal/margin_x 等，Squirrel 不识别。）
 
-AIME 兼容旧配色的 `hilited_back_color`：没有独立的 `hilited_candidate_back_color` 时，候选高亮使用前者；独立候选颜色（包括显式透明色）始终优先。数值型颜色按 24 位不透明 RGB/BGR 或更大的 32 位带 alpha 值解析；需要保留前导零透明通道时使用明确的八位十六进制字符串。YAML 中的 `0x` 字符串不会因为未加引号而自动转成十进制。
+KUME 兼容旧配色的 `hilited_back_color`：没有独立的 `hilited_candidate_back_color` 时，候选高亮使用前者；独立候选颜色（包括显式透明色）始终优先。数值型颜色按 24 位不透明 RGB/BGR 或更大的 32 位带 alpha 值解析；需要保留前导零透明通道时使用明确的八位十六进制字符串。YAML 中的 `0x` 字符串不会因为未加引号而自动转成十进制。
 
-AIME 可视化：已收录（自定义方案 aime_custom 的核心颜色键）。
+KUME 可视化：已收录（自定义方案 kume_custom 的核心颜色键）。
 catalog: appearance.custom.back_color, appearance.custom.border_color, appearance.custom.text_color, appearance.custom.candidate_text_color, appearance.custom.label_color, appearance.custom.comment_text_color, appearance.custom.hilited_candidate_back_color, appearance.custom.hilited_candidate_text_color, appearance.custom.hilited_candidate_label_color, appearance.custom.hilited_comment_text_color
 
-### AIME 主题包与 `aime-ime://theme` 导入
+### KUME 主题包与 `kume-ime://theme` 导入
 
-AIME 在 `preset_color_schemes` 之上定义了可分享的主题包（13 个颜色键、`0xAARRGGBB`），官网
-<https://aime.zool.app/themes/> 可浏览与编辑。链接 `aime-ime://theme?v=1&d=<base64url>` 由「AIME 设置」确认后写入
-`aime/generated/` 的 `preset_color_schemes/<id>` 与 `style/color_scheme(_dark)`。格式与规则见 [themes.md](themes.md)。
+KUME 在 `preset_color_schemes` 之上定义了可分享的主题包（13 个颜色键、`0xAARRGGBB`），官网
+<https://aime.zool.app/themes/> 可浏览与编辑。链接 `kume-ime://theme?v=1&d=<base64url>` 由「KUME 设置」确认后写入
+`kume/generated/` 的 `preset_color_schemes/<id>` 与 `style/color_scheme(_dark)`。格式与规则见 [themes.md](themes.md)。
 
 ## app_options 应用级选项
 
@@ -619,7 +619,7 @@ app_options:
 
 可用键：`ascii_mode`、`ascii_punct`、`inline` / `no_inline`（互斥）、`vim_mode`。
 
-AIME 可视化：部分已收录（计划做 App 列表编辑器）。
+KUME 可视化：部分已收录（计划做 App 列表编辑器）。
 catalog: advanced.app_options
 
 ## Lua 扩展机制与雾凇常用脚本
@@ -648,18 +648,18 @@ librime-lua 允许在 engine 中以 `lua_processor@*name` / `lua_translator@*nam
 | cold_word_drop/ | processor+filter 套件 | 隐藏/降频词条（Control+j 降频、Control+d 删词），当前方案未挂载 |
 | cn_en_spacer / en_spacer / is_in_user_dict / t9_preedit / debuger | 未挂载 | 中英加空格 / 英文补空格 / 用户词标记 / T9 显示 / 调试 |
 
-AIME 可视化：高级 YAML（开关由 switches 组暴露 emoji/traditionalization 等即可）。
+KUME 可视化：高级 YAML（开关由 switches 组暴露 emoji/traditionalization 等即可）。
 catalog: switches.emoji, switches.traditionalization
 
 ## catalog.json 字段说明与收录总表
 
-`config/catalog.json` 是 AIME 可视化配置 App 的机器可读目录：
+`config/catalog.json` 是 KUME 可视化配置 App 的机器可读目录：
 
 - `groups[]`：分组（general 输入习惯 / switching 中英切换 / spelling 模糊音与拼写 / keys 快捷键 / appearance 外观 / switches 开关默认值 / advanced 高级）。
-- `settings[]`：每项含 `id`（点号路径）、`group`、`title`、`description`、`file`（default=default.custom.yaml，schema=当前方案 .custom.yaml，frontend=aime.yaml）、`keypath`（RIME 补丁斜杠路径）、`type`（bool/int/double/string/enum/color/font/hotkey/stringList）、`default`、可选 `min`/`max`/`options`/`doc`（本文档锚点）。
+- `settings[]`：每项含 `id`（点号路径）、`group`、`title`、`description`、`file`（default=default.custom.yaml，schema=当前方案 .custom.yaml，frontend=kume.yaml）、`keypath`（RIME 补丁斜杠路径）、`type`（bool/int/double/string/enum/color/font/hotkey/stringList）、`default`、可选 `min`/`max`/`options`/`doc`（本文档锚点）。
 - spelling 组 bool 项附 `algebra: [...]`：开启时向 `speller/algebra` 注入的规则列表。
 - keys 组部分 bool 项附 `bindings: [...]`：开启时向 `key_binder/bindings` 追加的绑定。
-- 前端项的 keypath 与 squirrel.yaml 相同，写入 aime.yaml。
+- 前端项的 keypath 与 squirrel.yaml 相同，写入 kume.yaml。
 - color 类型值为 Squirrel 的 `0xAABBGGRR` 格式。
 
 收录总表即 catalog.json 本身；本文各节末尾的 `catalog:` 行为反向索引。
@@ -669,11 +669,11 @@ catalog: menu.page_size
 
 ---
 
-> **AIME 候选窗当前未实现的 squirrel.yaml 前端选项**（已从可视化目录移除，写入不会生效）：
+> **KUME 候选窗当前未实现的 squirrel.yaml 前端选项**（已从可视化目录移除，写入不会生效）：
 > `style/text_orientation: vertical`（竖排）、`style/shadow_size`、`style/show_paging`、`style/memorize_size`、
 > `style/mutual_exclusive`、`keyboard_layout`、`show_notifications_when`。列入 Roadmap，实现后再加回目录。
 
-## ascii_state（AIME 扩展，aime.yaml）
+## ascii_state（KUME 扩展，kume.yaml）
 
 | 键 | 默认 | 说明 |
 |---|---|---|
@@ -684,9 +684,9 @@ catalog: menu.page_size
 catalog: ascii_state.scope
 
 
-## 更新通道（AIME 应用设置）
+## 更新通道（KUME 应用设置）
 
-概览页“接收测试版”默认关闭，使用 `AppUpdateState` 存于 `aime/update.json` 的 `receiveBeta` 字段。
+概览页“接收测试版”默认关闭，使用 `AppUpdateState` 存于 `kume/update.json` 的 `receiveBeta` 字段。
 开启读取 `latest-beta.json`，关闭读取 `latest.json`；两者都要求同名 `.sig` 的 Ed25519 验签。
 稳定通道也会过滤错误发布到稳定清单中的预发布版本。切换通道清空上次检查、缓存版本及跳过状态。
 这是应用偏好，不写 RIME YAML；catalog 的 `appSettings` 登记此类非 RIME 设置，`settings` 仍仅用于 RIME 补丁。

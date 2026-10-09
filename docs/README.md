@@ -1,8 +1,8 @@
-# AIME 文档 / Documentation
+# KUME 文档 / Documentation
 
-AIME / 艾么输入法是基于 RIME 的开源 macOS 中文输入法，日常输入在本机处理，AI 按需参与。当前处于 0.1.x 开发预览；下载前请核对 [Release](https://github.com/zoolapp/aime/releases) 的版本、校验文件与公证说明。
+KUME / 酷米输入法是基于 RIME 的开源 macOS 中文输入法，日常输入在本机处理，AI 按需参与。当前处于 0.1.x 开发预览；下载前请核对 [Release](https://github.com/zoolapp/aime/releases) 的版本、校验文件与公证说明。
 
-AIME is an open-source Chinese input method for macOS, built on RIME, with local input processing and optional AI. It is in developer preview (0.1.x); check the release notes, checksums and notarization status before downloading.
+KUME is an open-source Chinese input method for macOS, built on RIME, with local input processing and optional AI. It is in developer preview (0.1.x); check the release notes, checksums and notarization status before downloading.
 
 | 你想做什么 / Goal | 入口 / Guide |
 | --- | --- |

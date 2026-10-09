@@ -1,5 +1,5 @@
 #!/usr/bin/env swift
-// Renders AIME's icons: the app icon set (both apps) and the menu-bar template icon.
+// Renders KUME's icons: the app icon set (both apps) and the menu-bar template icon.
 //   swift scripts/gen-icons.swift
 import AppKit
 import CoreGraphics
@@ -9,7 +9,7 @@ let root = URL(fileURLWithPath: #filePath).deletingLastPathComponent().deletingL
 // Preserve the source of every exported raster inside PNG metadata. This only adds
 // a text chunk; approved artwork (including the 1024px master's IDAT) is untouched.
 func withOrigin(_ data: Data, source: String) -> Data {
-    let origin = "impeccable:prompt\u{0}Origin: assets/brand/aime/base-v1/\(source), approved soft-bookmark vector export (17e0be2); scripts/gen-icons.swift preserves its artwork and scales only when required."
+    let origin = "impeccable:prompt\u{0}Origin: assets/brand/kume/base-v1/\(source), approved soft-bookmark vector export (17e0be2); scripts/gen-icons.swift preserves its artwork and scales only when required."
     var payload = Data("tEXt".utf8)
     payload.append(Data(origin.utf8))
     var crc: UInt32 = 0xFFFFFFFF
@@ -32,7 +32,7 @@ func withOrigin(_ data: Data, source: String) -> Data {
 
 // The approved master already includes macOS icon padding and its rounded paper base.
 // Scale it directly: drawing another frame would introduce a second corner treatment.
-let masterURL = root.appendingPathComponent("assets/brand/aime/base-v1/app-icon-candidate.png")
+let masterURL = root.appendingPathComponent("assets/brand/kume/base-v1/app-icon-candidate.png")
 guard let master = NSImage(contentsOf: masterURL) else {
     fatalError("Missing approved brand icon: \(masterURL.path)")
 }
@@ -78,14 +78,14 @@ try withOrigin(png(drawAppIcon(size: 512), pixels: 512), source: "app-icon-candi
 for (set, light, dark) in [("BrandLockup", "lockup-color.png", "lockup-white.png"),
                             ("BrandSquare", "square-black.png", "square-white.png")] {
     for (filename, source) in [("light.png", light), ("dark.png", dark)] {
-        let input = root.appendingPathComponent("assets/brand/aime/base-v1/\(source)")
+        let input = root.appendingPathComponent("assets/brand/kume/base-v1/\(source)")
         let output = root.appendingPathComponent("Apps/Shared/Assets.xcassets/\(set).imageset/\(filename)")
         try withOrigin(Data(contentsOf: input), source: source).write(to: output)
     }
 }
 
-// The input source icon (「艾」 in a 22×16 pt rounded rectangle) is drawn by
+// The input source icon (「酷」 in a 22×16 pt rounded rectangle) is drawn by
 // scripts/gen-input-source-icon.swift; keep its PDF byte-for-byte. The system tints it.
-try Data(contentsOf: root.appendingPathComponent("assets/brand/aime/input-source-v2/AIME-ai.pdf"))
-    .write(to: root.appendingPathComponent("Apps/AIME/Resources/AIME.pdf"))
+try Data(contentsOf: root.appendingPathComponent("assets/brand/kume/input-source-v2/KUME-ku.pdf"))
+    .write(to: root.appendingPathComponent("Apps/KUME/Resources/KUME.pdf"))
 print("icons written from approved soft-bookmark brand master")

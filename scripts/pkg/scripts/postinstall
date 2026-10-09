@@ -1,15 +1,15 @@
 #!/bin/bash
-# Register, enable and select AIME for the user who ran the installer. Text Input
+# Register, enable and select KUME for the user who ran the installer. Text Input
 # Sources is per user, so this must run as that user, not as root.
 login_user="$(/usr/bin/stat -f%Su /dev/console)"
-app="/Library/Input Methods/AIME.app"
+app="/Library/Input Methods/KUME.app"
 # Fail the install visibly if the payload did not land here, rather than report success
 # for an input method the system cannot find.
-if [[ ! -x "$app/Contents/MacOS/AIME" ]]; then
-  echo "AIME: $app is missing after install" >&2
+if [[ ! -x "$app/Contents/MacOS/KUME" ]]; then
+  echo "KUME: $app is missing after install" >&2
   exit 1
 fi
 if [[ -n "$login_user" && "$login_user" != "root" ]]; then
-  /usr/bin/sudo -u "$login_user" "$app/Contents/MacOS/AIME" --install || true
+  /usr/bin/sudo -u "$login_user" "$app/Contents/MacOS/KUME" --install || true
 fi
 exit 0

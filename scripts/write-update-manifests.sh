@@ -18,11 +18,11 @@ def entry(name):
     path = os.path.join(out, name)
     return {"name": name, "size": os.path.getsize(path), "sha256": hashlib.sha256(open(path, "rb").read()).hexdigest()}
 manifest = {
-    "product": "aime", "version": version, "build": int(build),
+    "product": "kume", "version": version, "build": int(build),
     "date": datetime.date.today().isoformat(), "prerelease": "-" in version or status != "notarized",
     "minimumSystemVersion": "26.0", "default": "pkg",
-    "files": {"pkg": entry(f"AIME-{version}.pkg"), "zip": entry(f"AIME-{version}.zip"),
-              "source": entry(f"AIME-{version}-source.tar.gz"), "sums": {"name": "SHA256SUMS.txt"}},
+    "files": {"pkg": entry(f"KUME-{version}.pkg"), "zip": entry(f"KUME-{version}.zip"),
+              "source": entry(f"KUME-{version}-source.tar.gz"), "sums": {"name": "SHA256SUMS.txt"}},
 }
 names = ["latest-beta.json"] if "-" in version else ["latest.json", "latest-beta.json"]
 for name in names:
@@ -32,10 +32,10 @@ for name in names:
 PY
 for name in latest.json latest-beta.json; do
   [[ -f "$OUT/$name" ]] || continue
-  if [[ -n "${AIME_MANIFEST_KEY:-}" ]]; then
+  if [[ -n "${KUME_MANIFEST_KEY:-}" ]]; then
     swift "$ROOT/scripts/sign-manifest.swift" sign "$OUT/$name"
   elif [[ "$STATUS" == notarized || "$STATUS" == pending ]]; then
-    echo "AIME_MANIFEST_KEY is required to sign $name for an official release" >&2
+    echo "KUME_MANIFEST_KEY is required to sign $name for an official release" >&2
     exit 1
   fi
 done

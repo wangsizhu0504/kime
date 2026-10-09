@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-"""Builds a synthetic AIME workspace for website screenshots (no real user data).
+"""Builds a synthetic KUME workspace for website screenshots (no real user data).
 
     python3 scripts/make-demo-sandbox.py <dir>
 
-Creates <dir>/rime (AIME_USER_DIR) with a few per-app options and features enabled, and
-<dir>/stats (AIME_STATS_DIR) with a year of invented typing statistics. Then deploy with
-the CLI (AIME_USER_DIR=<dir>/rime aime deploy) and capture with scripts/ui-shots.sh
-(AIME_UI_SOURCE=<dir>/rime AIME_UI_STATS_SOURCE=<dir>/stats).
+Creates <dir>/rime (KUME_USER_DIR) with a few per-app options and features enabled, and
+<dir>/stats (KUME_STATS_DIR) with a year of invented typing statistics. Then deploy with
+the CLI (KUME_USER_DIR=<dir>/rime kume deploy) and capture with scripts/ui-shots.sh
+(KUME_UI_SOURCE=<dir>/rime KUME_UI_STATS_SOURCE=<dir>/stats).
 """
 import datetime
 import json
@@ -36,23 +36,23 @@ WORDS = {
     "部署": 12, "主题": 11, "快捷键": 10, "常用语": 9, "大模型": 9,
 }
 
-os.makedirs(os.path.join(rime, "aime", "generated"), exist_ok=True)
+os.makedirs(os.path.join(rime, "kume", "generated"), exist_ok=True)
 modes = {"chinese": "false", "english": "true"}
 lines = ["patch:"]
 for bundle, (mode, _) in APPS.items():
     if mode in modes:
         lines.append(f"  app_options/{bundle}:")
         lines.append(f"    ascii_mode: {modes[mode]}")
-lines += ["  style/color_scheme: aime_light", "  style/color_scheme_dark: aime_dark"]
-open(os.path.join(rime, "aime", "generated", "aime.yaml"), "w").write("\n".join(lines) + "\n")
-json.dump({"usageStats": True, "aiPolish": True}, open(os.path.join(rime, "aime", "features.json"), "w"))
+lines += ["  style/color_scheme: kume_light", "  style/color_scheme_dark: kume_dark"]
+open(os.path.join(rime, "kume", "generated", "kume.yaml"), "w").write("\n".join(lines) + "\n")
+json.dump({"usageStats": True, "aiPolish": True}, open(os.path.join(rime, "kume", "features.json"), "w"))
 snippets = [("手机号", ["+852 6100 6100", "+86 139 1234 5678", "+1 (415) 555-0100"]),
             ("邮箱", ["hello@zool.app", "luolei@work.example", "me@personal.example"]),
             ("地址", ["香港中环皇后大道中 99 号", "成都市锦江区春熙路 1 号"]),
             ("常用回复", ["收到，谢谢！", "我晚点回复你", "好的，八点见。"])]
 json.dump({"categories": [{"id": f"00000000-0000-0000-0000-00000000000{i}", "name": n, "items": items}
                           for i, (n, items) in enumerate(snippets, 1)]},
-          open(os.path.join(rime, "aime", "snippets.json"), "w"), ensure_ascii=False, indent=2)
+          open(os.path.join(rime, "kume", "snippets.json"), "w"), ensure_ascii=False, indent=2)
 
 os.makedirs(os.path.join(stats, "Activity"), exist_ok=True)
 today = datetime.date.today()

@@ -2,27 +2,27 @@
 # Finishes a release whose notarization was still in progress when CI ended
 # (scripts/release.sh wrote NOTARY_PENDING.txt). Once Apple accepts every submission it
 # staples the tickets into the pkg and the app inside the zip, recomputes SHA256SUMS,
-# rewrites and re-signs latest.json and latest-beta.json (AIME_MANIFEST_KEY, from .env).
+# rewrites and re-signs latest.json and latest-beta.json (KUME_MANIFEST_KEY, from .env).
 #
 #   bash scripts/finish-notarization.sh <artefact-dir> [--publish]
 #
-# <artefact-dir> holds the CI artefact (gh run download <id> -R zoolapp/aime -D <dir>).
+# <artefact-dir> holds the CI artefact (gh run download <id> -R wangsizhu0504/kime -D <dir>).
 # --publish replaces the GitHub Release assets (same tag) and the files on R2
-# (zool-assets/aime/releases/<version>/ and aime/latest.json[.sig]).
+# (zool-assets/kume/releases/<version>/ and kume/latest.json[.sig]).
 # Exit 3 while a submission is still in progress.
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 DIR="$(cd "${1:?usage: finish-notarization.sh <artefact-dir> [--publish]}" && pwd)"
 PUBLISH="${2:-}"
 [[ -f "$ROOT/.env" ]] && { set -a; . "$ROOT/.env"; set +a; }
-: "${AIME_NOTARY_KEY_PATH:?}" "${AIME_NOTARY_KEY_ID:?}" "${AIME_NOTARY_ISSUER_ID:?}" "${AIME_MANIFEST_KEY:?}"
-[[ "$AIME_NOTARY_KEY_PATH" = /* ]] || AIME_NOTARY_KEY_PATH="$ROOT/$AIME_NOTARY_KEY_PATH"
-NOTARY=(--key "$AIME_NOTARY_KEY_PATH" --key-id "$AIME_NOTARY_KEY_ID" --issuer "$AIME_NOTARY_ISSUER_ID")
+: "${KUME_NOTARY_KEY_PATH:?}" "${KUME_NOTARY_KEY_ID:?}" "${KUME_NOTARY_ISSUER_ID:?}" "${KUME_MANIFEST_KEY:?}"
+[[ "$KUME_NOTARY_KEY_PATH" = /* ]] || KUME_NOTARY_KEY_PATH="$ROOT/$KUME_NOTARY_KEY_PATH"
+NOTARY=(--key "$KUME_NOTARY_KEY_PATH" --key-id "$KUME_NOTARY_KEY_ID" --issuer "$KUME_NOTARY_ISSUER_ID")
 
 MANIFEST="$DIR/latest-beta.json"
 [[ -f "$MANIFEST" ]] || MANIFEST="$DIR/latest.json"
 VERSION="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["version"])' "$MANIFEST")"
-PKG="$DIR/AIME-$VERSION.pkg" ZIP="$DIR/AIME-$VERSION.zip" SRC="$DIR/AIME-$VERSION-source.tar.gz"
+PKG="$DIR/KUME-$VERSION.pkg" ZIP="$DIR/KUME-$VERSION.zip" SRC="$DIR/KUME-$VERSION-source.tar.gz"
 
 if [[ -f "$DIR/NOTARY_PENDING.txt" ]]; then
   while IFS=$'\t' read -r file id; do
@@ -39,8 +39,8 @@ fi
 xcrun stapler staple "$PKG" && xcrun stapler validate "$PKG"
 WORK="$(mktemp -d)"; trap 'rm -rf "$WORK"' EXIT
 ditto -x -k "$ZIP" "$WORK"
-xcrun stapler staple "$WORK/AIME.app" && xcrun stapler validate "$WORK/AIME.app"
-rm -f "$ZIP" && ditto -c -k --keepParent "$WORK/AIME.app" "$ZIP"
+xcrun stapler staple "$WORK/KUME.app" && xcrun stapler validate "$WORK/KUME.app"
+rm -f "$ZIP" && ditto -c -k --keepParent "$WORK/KUME.app" "$ZIP"
 spctl --assess --type install --verbose=2 "$PKG"
 
 (cd "$DIR" && shasum -a 256 "$(basename "$PKG")" "$(basename "$ZIP")" "$(basename "$SRC")" > SHA256SUMS.txt)
@@ -64,7 +64,7 @@ for name in (["latest-beta.json"] if "-" in version else ["latest.json", "latest
 PY
 for manifest in latest.json latest-beta.json; do
   [[ -f "$DIR/$manifest" ]] || continue
-  AIME_MANIFEST_KEY="$AIME_MANIFEST_KEY" swift "$ROOT/scripts/sign-manifest.swift" sign "$DIR/$manifest"
+  KUME_MANIFEST_KEY="$KUME_MANIFEST_KEY" swift "$ROOT/scripts/sign-manifest.swift" sign "$DIR/$manifest"
 done
 echo notarized > "$DIR/SIGNING_STATUS"
 rm -f "$DIR/NOTARY_PENDING.txt"
@@ -95,10 +95,10 @@ PY
 STABLE_NEWER="" BETA_NEWER=""  # bash 3.2 (macOS) has no associative arrays
 if [[ -f "$DIR/latest.json" ]]; then STABLE_NEWER="$(newer_live latest.json)" || exit 1; fi
 if [[ -f "$DIR/latest-beta.json" ]]; then BETA_NEWER="$(newer_live latest-beta.json)" || exit 1; fi
-gh release upload "v$VERSION" -R zoolapp/aime --clobber "$PKG" "$ZIP" "$SRC" "$DIR/SHA256SUMS.txt"
-gh release edit "v$VERSION" -R zoolapp/aime --title "AIME $VERSION"
+gh release upload "v$VERSION" -R wangsizhu0504/kime --clobber "$PKG" "$ZIP" "$SRC" "$DIR/SHA256SUMS.txt"
+gh release edit "v$VERSION" -R wangsizhu0504/kime --title "KUME $VERSION"
 for f in "$PKG" "$ZIP" "$SRC" "$DIR/SHA256SUMS.txt"; do
-  (cd "$ROOT/../zool-get" && npx wrangler r2 object put "zool-assets/aime/releases/$VERSION/$(basename "$f")" --file "$f" --remote >/dev/null)
+  (cd "$ROOT/../zool-get" && npx wrangler r2 object put "zool-assets/kume/releases/$VERSION/$(basename "$f")" --file "$f" --remote >/dev/null)
 done
 for manifest in latest.json latest-beta.json; do
   [[ -f "$DIR/$manifest" ]] || continue
@@ -107,8 +107,8 @@ for manifest in latest.json latest-beta.json; do
     echo "$manifest stays at $newer (newer)"
     continue
   fi
-  (cd "$ROOT/../zool-get" && npx wrangler r2 object put "zool-assets/aime/$manifest.sig" --file "$DIR/$manifest.sig" \
-    --content-type text/plain --remote >/dev/null && npx wrangler r2 object put "zool-assets/aime/$manifest" \
+  (cd "$ROOT/../zool-get" && npx wrangler r2 object put "zool-assets/kume/$manifest.sig" --file "$DIR/$manifest.sig" \
+    --content-type text/plain --remote >/dev/null && npx wrangler r2 object put "zool-assets/kume/$manifest" \
     --file "$DIR/$manifest" --content-type application/json --remote >/dev/null)
 done
 echo "published $VERSION (notarized)"

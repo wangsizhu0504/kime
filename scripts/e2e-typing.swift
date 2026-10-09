@@ -1,5 +1,5 @@
 #!/usr/bin/env swift
-// End-to-end typing test: selects the AIME input source, types into a fresh TextEdit
+// End-to-end typing test: selects the KUME input source, types into a fresh TextEdit
 // document through real key events, reads back the text, then restores the previous
 // input source.   swift scripts/e2e-typing.swift [keys] [expected]
 import Carbon
@@ -14,10 +14,10 @@ func sources(_ id: String) -> [TISInputSource] {
 }
 
 let previous = TISCopyCurrentKeyboardInputSource().takeRetainedValue()
-guard let aime = sources("app.zool.inputmethod.aime.hans").first else {
-    print("FAIL: AIME input source not registered"); exit(1)
+guard let kume = sources("app.kriszu.inputmethod.kume.hans").first else {
+    print("FAIL: KUME input source not registered"); exit(1)
 }
-TISEnableInputSource(aime)
+TISEnableInputSource(kume)
 
 func osa(_ script: String) -> String {
     let p = Process()
@@ -31,7 +31,7 @@ func osa(_ script: String) -> String {
 _ = osa(#"tell application "TextEdit" to activate"#)
 _ = osa(#"tell application "TextEdit" to make new document"#)
 Thread.sleep(forTimeInterval: 1.2)
-TISSelectInputSource(aime)
+TISSelectInputSource(kume)
 // Give the system time to launch the input method process on first selection.
 Thread.sleep(forTimeInterval: 3.0)
 

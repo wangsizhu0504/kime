@@ -2,7 +2,7 @@
 """Probe only a downloaded package's CLI; never install or start IMKit.
 
 This is a component test, not a clean macOS installation or UI acceptance test.
-Uses macOS sandbox-exec to deny existing RIME/AIME data, development libraries,
+Uses macOS sandbox-exec to deny existing RIME/KUME data, development libraries,
 and networking. All workspace data and extracted binaries live in a fresh temp.
 """
 import argparse
@@ -46,25 +46,25 @@ def verify(package, sums, output, preview_baseline=False):
         report["distribution_checks_passed"] = all(p.returncode == 0 for p in (signature, gatekeeper, staple))
         if not report["distribution_checks_passed"] and not preview_baseline:
             raise ValueError("Distribution checks failed; runtime probe refused")
-        with tempfile.TemporaryDirectory(prefix="aime-package-isolation-", dir="/private/tmp") as temporary:
+        with tempfile.TemporaryDirectory(prefix="kume-package-isolation-", dir="/private/tmp") as temporary:
             root = Path(temporary).resolve()
             expanded = root / "expanded"
             if run("expand", ["/usr/sbin/pkgutil", "--expand-full", str(package), str(expanded)]).returncode:
                 raise ValueError("Package expansion failed")
-            apps = list(expanded.rglob("AIME.app"))
+            apps = list(expanded.rglob("KUME.app"))
             if len(apps) != 1:
                 raise ValueError("Expected exactly one input method app")
             app = apps[0]
-            cli = app / "Contents/Helpers/aime"
+            cli = app / "Contents/Helpers/kume"
             if not cli.is_file():
                 raise ValueError("Bundled CLI is missing")
             if run("app-signature", ["/usr/bin/codesign", "--verify", "--deep", "--strict", str(app)]).returncode:
                 raise ValueError("App signature integrity failed")
             home = Path.home().resolve()
             repo = Path(__file__).resolve().parent.parent
-            denied = [home / p for p in ["Library/Rime", "Library/AIME", "Library/Logs/AIME",
-                      "Library/Application Support/AIME", "Library/Input Methods"]]
-            denied += [Path("/Library/Input Methods"), Path("/Applications/AIME Settings.app"),
+            denied = [home / p for p in ["Library/Rime", "Library/KUME", "Library/Logs/KUME",
+                      "Library/Application Support/KUME", "Library/Input Methods"]]
+            denied += [Path("/Library/Input Methods"), Path("/Applications/KUME Settings.app"),
                        Path("/opt/homebrew"), Path("/usr/local"), repo]
             profile = root / "isolation.sb"
             policy = '(version 1)\n(allow default)\n(deny network*)\n'
@@ -73,16 +73,16 @@ def verify(package, sums, output, preview_baseline=False):
             profile.write_text(policy)
             (output / "isolation.sb").write_text(policy)
             env = {"PATH": "/usr/bin:/bin:/usr/sbin:/sbin", "HOME": str(root / "home"),
-                   "TMPDIR": str(root), "AIME_USER_DIR": str(root / "workspace"),
-                   "AIME_STATS_DIR": str(root / "stats"),
-                   "AIME_CREDENTIALS_FILE": str(root / "credentials.json")}
+                   "TMPDIR": str(root), "KUME_USER_DIR": str(root / "workspace"),
+                   "KUME_STATS_DIR": str(root / "stats"),
+                   "KUME_CREDENTIALS_FILE": str(root / "credentials.json")}
             (root / "home").mkdir()
             prefix = ["/usr/bin/sandbox-exec", "-f", str(profile)]
             # Use a known existing forbidden file, so a missing file cannot fake isolation.
             probe = run("deny-probe", prefix + ["/usr/bin/stat", str(repo / "AGENTS.md")], env, root)
             if probe.returncode == 0 or "Operation not permitted" not in probe.stderr:
                 raise ValueError("Sandbox denial was not verified")
-            files = [cli, app / "Contents/MacOS/AIME"] + list((app / "Contents/Frameworks").rglob("*.dylib"))
+            files = [cli, app / "Contents/MacOS/KUME"] + list((app / "Contents/Frameworks").rglob("*.dylib"))
             if len(files) > 64:
                 raise ValueError("Hard Mach-O inventory limit exceeded")
             forbidden = re.compile(r"^\s*(?:/opt/homebrew/|/usr/local/|/Users/|/Library/Input Methods/)", re.M)
@@ -100,7 +100,7 @@ def verify(package, sums, output, preview_baseline=False):
             if bench.returncode or not re.search(r"^\d+\. .*?[\u3400-\u9fff]", bench.stdout, re.M):
                 raise ValueError("Chinese candidates were not observed")
             if not all((root / "workspace/build" / name).is_file()
-                       for name in ["default.yaml", "aime.yaml", "rime_ice.schema.yaml"]):
+                       for name in ["default.yaml", "kume.yaml", "rime_ice.schema.yaml"]):
                 raise ValueError("Empty-workspace deployment artifacts are missing")
             report["bundle_smoke_passed"] = True
     except (ValueError, RuntimeError, subprocess.TimeoutExpired) as error:

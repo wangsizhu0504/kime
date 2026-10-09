@@ -40,8 +40,8 @@ class DictionaryMetadataPermissionsTests(unittest.TestCase):
         shared = folder / "SharedSupport"
         shared.mkdir()
         shared.chmod(0o755)
-        (shared / "aime").mkdir()
-        (shared / "aime").chmod(0o755)
+        (shared / "kume").mkdir()
+        (shared / "kume").chmod(0o755)
         (shared / "fixture.dict.yaml").write_text(
             "---\nname: fixture\nversion: 2026-10-05\n...\nFixture\tfixture\t1\n"
         )
@@ -51,7 +51,7 @@ class DictionaryMetadataPermissionsTests(unittest.TestCase):
             "source": {"type": "github-release", "repo": "fixture/fixture",
                        "tag": "fixture", "asset": "fixture.zip"},
         }]}))
-        return shared, registry, shared / "aime/dictionary-metadata.json"
+        return shared, registry, shared / "kume/dictionary-metadata.json"
 
     def test_new_public_metadata_ignores_private_umask(self):
         with tempfile.TemporaryDirectory() as temporary:

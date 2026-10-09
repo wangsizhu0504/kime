@@ -14,7 +14,7 @@ ENGINE="rime-${LIBRIME_COMMIT}-macOS-universal.tar.bz2"
 DEPS="rime-deps-${LIBRIME_COMMIT}-macOS-universal.tar.bz2"
 CACHE="$VENDOR/.cache"
 OUT="$VENDOR/librime"
-XCF="$ROOT/Packages/AIMEKit/Frameworks/CRime.xcframework"
+XCF="$ROOT/Packages/KUMEKit/Frameworks/CRime.xcframework"
 
 mkdir -p "$CACHE"
 for f in "$ENGINE" "$DEPS"; do

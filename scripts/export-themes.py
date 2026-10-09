@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-"""Exports AIME's built-in color schemes as aime-theme v1 packages (docs/themes.md).
+"""Exports KUME's built-in color schemes as kume-theme v1 packages (docs/themes.md).
 
     python3 scripts/export-themes.py [--out <themes.json>] [--fixtures <dir>]
 
-Defaults write the website data (../aime-web/src/data/themes.json when that checkout
-exists) and the shared test fixtures (Packages/AIMEKit/Tests/AIMECoreTests/Fixtures/theme-v1).
+Defaults write the website data (../kume-web/src/data/themes.json when that checkout
+exists) and the shared test fixtures (Packages/KUMEKit/Tests/KUMECoreTests/Fixtures/theme-v1).
 The website copies the fixture directory verbatim; both test suites must match it.
 """
 import argparse
@@ -17,7 +17,7 @@ import sys
 import yaml
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-SOURCE = os.path.join(ROOT, "SharedSupport", "aime.yaml")
+SOURCE = os.path.join(ROOT, "SharedSupport", "kume.yaml")
 KEYS = [
     "back_color", "border_color", "preedit_back_color", "text_color", "hilited_text_color",
     "hilited_back_color", "candidate_text_color", "comment_text_color", "label_color",
@@ -86,7 +86,7 @@ def is_dark(colors):
 
 
 def package(theme_id, name, author, colors, layout=None):
-    p = {"format": "aime-theme", "version": 2 if layout else 1, "id": theme_id, "name": name, "author": author, "colors": colors}
+    p = {"format": "kume-theme", "version": 2 if layout else 1, "id": theme_id, "name": name, "author": author, "colors": colors}
     if layout:
         p["layout"] = layout
     return p
@@ -98,15 +98,15 @@ def number(v):
 
 
 def default_layout(style):
-    """What the panel uses with AIME's shipped style: style/aime wins, then style."""
-    aime = style.get("aime") or {}
-    return {k: number(aime.get(k, style[k])) for k in LAYOUT_KEYS if k in aime or k in style}
+    """What the panel uses with KUME's shipped style: style/kume wins, then style."""
+    kume = style.get("kume") or {}
+    return {k: number(kume.get(k, style[k])) for k in LAYOUT_KEYS if k in kume or k in style}
 
 
 def case(pkg):
     d = encode(pkg)
     return {"id": pkg["id"], "package": pkg, "canonical": canonical(pkg), "d": d,
-            "url": "aime-ime://theme?v=%d&d=" % pkg["version"] + d, "min_contrast": min_contrast(pkg["colors"]),
+            "url": "kume-ime://theme?v=%d&d=" % pkg["version"] + d, "min_contrast": min_contrast(pkg["colors"]),
             "dark": is_dark(pkg["colors"])}
 
 
@@ -121,7 +121,7 @@ def builtins():
             raise SystemExit("%s: only color_format argb is exported" % theme_id)
         colors = {k: color_string(scheme[k]) if k in scheme else FALLBACK[k] for k in KEYS}
         layout = dict(base_layout, **{k: number(scheme[k]) for k in LAYOUT_KEYS if k in scheme})
-        themes.append(package(theme_id, scheme.get("name", theme_id), scheme.get("author", "AIME"), colors, layout))
+        themes.append(package(theme_id, scheme.get("name", theme_id), scheme.get("author", "KUME"), colors, layout))
     return themes, hashlib.sha256(raw).hexdigest()
 
 
@@ -129,7 +129,7 @@ def extras(themes):
     by_id = {t["id"]: t for t in themes}
     sakura = dict(by_id["sakura"]["colors"])
     sakura["hilited_candidate_back_color"] = "0xFFD81B60"
-    low = dict(by_id["aime_light"]["colors"])
+    low = dict(by_id["kume_light"]["colors"])
     low.update(candidate_text_color="0xFFC8C7C4", hilited_candidate_back_color="0xFFEDEDEB",
                hilited_candidate_text_color="0xFFFFFFFF")
     tight = dict(by_id["sakura"]["layout"], corner_radius=14, hilited_corner_radius=0, border_width=0, border_height=0, font_point=18)
@@ -154,7 +154,7 @@ def invalid_cases(themes):
     oversize["padding"] = "x" * 4200
     rows = [
                 ("wrong_format", variant(format="ghostty"), "format"),
-        ("reserved_id", variant(id="aime_custom"), "reserved"),
+        ("reserved_id", variant(id="kume_custom"), "reserved"),
         ("bad_id", variant(id="Sakura-Test"), "id"),
         ("missing_color", missing, "colors"),
         ("bad_color", variant(colors={"back_color": "red"}), "colors"),
@@ -177,16 +177,16 @@ def write(path, value):
 
 
 def main():
-    web = os.path.join(os.path.dirname(ROOT), "aime-web", "src", "data", "themes.json")
+    web = os.path.join(os.path.dirname(ROOT), "kume-web", "src", "data", "themes.json")
     parser = argparse.ArgumentParser()
     parser.add_argument("--out", default=web if os.path.isdir(os.path.dirname(web)) else None)
-    parser.add_argument("--fixtures", default=os.path.join(ROOT, "Packages/AIMEKit/Tests/AIMECoreTests/Fixtures/theme-v1"))
+    parser.add_argument("--fixtures", default=os.path.join(ROOT, "Packages/KUMEKit/Tests/KUMECoreTests/Fixtures/theme-v1"))
     args = parser.parse_args()
 
     themes, source_sha = builtins()
     cases = [case(t) for t in themes]
     if args.out:
-        write(args.out, {"version": 1, "source": "SharedSupport/aime.yaml", "source_sha256": source_sha,
+        write(args.out, {"version": 1, "source": "SharedSupport/kume.yaml", "source_sha256": source_sha,
                          "themes": [{"id": c["id"], "name": c["package"]["name"], "author": c["package"]["author"],
                                      "colors": c["package"]["colors"], "layout": c["package"].get("layout"), "dark": c["dark"],
                                      "min_contrast": c["min_contrast"], "d": c["d"]} for c in cases]})

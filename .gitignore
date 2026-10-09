@@ -28,4 +28,4 @@ __pycache__/
 dist/
 
 # SwiftPM binary target assembled by scripts/fetch-librime.sh
-Packages/AIMEKit/Frameworks/
+Packages/KUMEKit/Frameworks/

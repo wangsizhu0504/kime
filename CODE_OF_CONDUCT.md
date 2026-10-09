@@ -36,7 +36,7 @@ This Code of Conduct applies within all community spaces, and also applies when 
 
 ## Enforcement
 
-Instances of abusive, harassing, or otherwise unacceptable behavior may be reported to AIME's community leader responsible for enforcement, Luo Lei (@foru17), using a private contact method listed on [the maintainer profile](https://github.com/foru17). All complaints will be reviewed and investigated promptly and fairly.
+Instances of abusive, harassing, or otherwise unacceptable behavior may be reported to KUME's community leader responsible for enforcement, Luo Lei (@foru17), using a private contact method listed on [the maintainer profile](https://github.com/foru17). All complaints will be reviewed and investigated promptly and fairly.
 
 All community leaders are obligated to respect the privacy and security of the reporter of any incident.
 
@@ -72,7 +72,7 @@ Community leaders will follow these Community Impact Guidelines in determining t
 
 ## Attribution
 
-AIME adapts the reporting contact and adds private-channel fallback guidance; the remaining covenant text is unchanged.
+KUME adapts the reporting contact and adds private-channel fallback guidance; the remaining covenant text is unchanged.
 
 This Code of Conduct is adapted from the [Contributor Covenant][homepage], version 2.1, available at [https://www.contributor-covenant.org/version/2/1/code_of_conduct.html][v2.1].
 

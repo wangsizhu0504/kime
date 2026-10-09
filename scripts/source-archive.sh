@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Builds AIME-<version>-source.tar.gz, the corresponding source for one release:
-#   aime/                AIME at the release commit (git archive, MIT)
+# Builds KUME-<version>-source.tar.gz, the corresponding source for one release:
+#   kume/                KUME at the release commit (git archive, MIT)
 #   upstream/librime/    librime at the pinned version (BSD-3-Clause)
 #   upstream/librime-*/  the three native plugins at the commits in
 #                        licenses/native-plugins/manifest.json (lua, predict: BSD-3-Clause;
@@ -15,21 +15,21 @@ ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 VERSION="${1:?usage: scripts/source-archive.sh <version> <out-dir> [<commit>]}"
 OUT="${2:?usage: scripts/source-archive.sh <version> <out-dir> [<commit>]}"
 COMMIT="${3:-HEAD}"
-NAME="AIME-$VERSION-source"
+NAME="KUME-$VERSION-source"
 WORK="$(mktemp -d)"
 trap 'rm -rf "$WORK"' EXIT
 DEST="$WORK/$NAME"
-mkdir -p "$DEST/aime" "$DEST/upstream" "$OUT"
+mkdir -p "$DEST/kume" "$DEST/upstream" "$OUT"
 
 fetch() {  # <url> <file>: bounded download, prints sha256
   curl -fsSL --retry 3 --max-time 300 -o "$2" "$1"
   shasum -a 256 "$2" | cut -d' ' -f1
 }
 
-git -C "$ROOT" archive --format=tar "$COMMIT" | tar -x -C "$DEST/aime"
+git -C "$ROOT" archive --format=tar "$COMMIT" | tar -x -C "$DEST/kume"
 {
-  echo "AIME $VERSION corresponding source"
-  echo "aime/: git $(git -C "$ROOT" rev-parse "$COMMIT")"
+  echo "KUME $VERSION corresponding source"
+  echo "kume/: git $(git -C "$ROOT" rev-parse "$COMMIT")"
 } > "$DEST/SOURCES.txt"
 
 eval "$(grep -E '^LIBRIME_(VERSION|COMMIT)=[0-9A-Za-z.]+$' "$ROOT/Vendor/librime.lock")"

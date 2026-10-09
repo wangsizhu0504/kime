@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
-# Assembles build/SharedSupport — the read-only data directory bundled into AIME.app:
+# Assembles build/SharedSupport — the read-only data directory bundled into KUME.app:
 #   * 雾凇拼音 (rime-ice) at the version pinned in dicts/registry.json, sha256-verified
 #   * OpenCC data from the pinned librime release
-#   * AIME's own files from SharedSupport/ (aime.yaml, aime/defaults/…)
+#   * KUME's own files from SharedSupport/ (kume.yaml, kume/defaults/…)
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
@@ -38,7 +38,7 @@ if [[ $(find "$OUT" -mindepth 1 -maxdepth 1 | wc -l) -eq 1 && -d "$(find "$OUT" 
   inner="$(find "$OUT" -mindepth 1 -maxdepth 1)"
   mv "$inner"/* "$OUT"/ && rmdir "$inner"
 fi
-# Frontend files AIME does not use.
+# Frontend files KUME does not use.
 rm -f "$OUT/squirrel.yaml" "$OUT/weasel.yaml" "$OUT"/*.custom.yaml
 rm -rf "$OUT/others" "$OUT/.github"
 
@@ -47,12 +47,12 @@ cp -n "$ROOT/Vendor/librime/share/opencc/"* "$OUT/opencc/" 2>/dev/null || true
 ditto "$ROOT/SharedSupport" "$OUT"
 
 # The 2026 AI / internet vocabulary is no longer bundled: it is an optional online
-# vocabulary (github.com/zoolapp/aime-dicts) subscribed from AIME Settings.
-rm -f "$OUT/aime_tech.txt" "$OUT/aime/aime_tech.tsv"
+# vocabulary (github.com/zoolapp/aime-dicts) subscribed from KUME Settings.
+rm -f "$OUT/kume_tech.txt" "$OUT/kume/kume_tech.tsv"
 
-echo "rime-ice $(basename "$ASSET")" > "$OUT/aime/VERSION"
+echo "rime-ice $(basename "$ASSET")" > "$OUT/kume/VERSION"
 # Diagnostic metadata for Settings, which intentionally does not link librime.
-sed -n 's/^LIBRIME_VERSION=//p' "$ROOT/Vendor/librime.lock" > "$OUT/aime/LIBRIME_VERSION"
+sed -n 's/^LIBRIME_VERSION=//p' "$ROOT/Vendor/librime.lock" > "$OUT/kume/LIBRIME_VERSION"
 /usr/bin/python3 "$ROOT/scripts/dictionary-metadata.py" --shared-dir "$OUT" --registry "$REGISTRY"
 bash "$ROOT/scripts/stage-plugins.sh" >/dev/null
 echo "==> done: $(du -sh "$OUT" | cut -f1) in $OUT"

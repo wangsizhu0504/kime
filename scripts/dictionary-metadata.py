@@ -164,8 +164,8 @@ def main():
     parser.add_argument("--output", type=Path)
     parser.add_argument("--check", action="store_true")
     args = parser.parse_args()
-    output = args.output or args.shared_dir / "aime/dictionary-metadata.json"
-    protected = [Path.home() / "Library/Rime", Path.home() / "Library/AIME/Rime"]
+    output = args.output or args.shared_dir / "kume/dictionary-metadata.json"
+    protected = [Path.home() / "Library/Rime", Path.home() / "Library/KUME/Rime"]
     try:
         for candidate in (args.shared_dir.resolve(), output.resolve()):
             if any(candidate == path or candidate.is_relative_to(path) for path in protected):

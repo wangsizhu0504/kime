@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Verify the published catalog and real AIME subscriptions in disposable directories."""
+"""Verify the published catalog and real KUME subscriptions in disposable directories."""
 
 import argparse
 import hashlib
@@ -15,14 +15,14 @@ MAX_FEEDS = 10
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--cli", type=Path, default=ROOT / "Packages/AIMEKit/.build/debug/aime")
+    parser.add_argument("--cli", type=Path, default=ROOT / "Packages/KUMEKit/.build/debug/kume")
     parser.add_argument("--evidence", type=Path, required=True)
     args = parser.parse_args()
     cli = args.cli.resolve(strict=True)
     if args.evidence.exists():
         parser.error("evidence directory already exists; use a fresh directory")
     args.evidence.mkdir(parents=True)
-    with tempfile.TemporaryDirectory(prefix="aime-online-verification-") as temporary:
+    with tempfile.TemporaryDirectory(prefix="kume-online-verification-") as temporary:
         root = Path(temporary)
         catalog_file = root / "index.json"
         response = subprocess.run([
@@ -32,7 +32,7 @@ def main():
         if response.stdout != "200":
             raise RuntimeError("catalog did not return HTTP 200")
         catalog_bytes = catalog_file.read_bytes()
-        if catalog_bytes != (ROOT / "SharedSupport/aime/vocabulary-catalog.json").read_bytes():
+        if catalog_bytes != (ROOT / "SharedSupport/kume/vocabulary-catalog.json").read_bytes():
             raise RuntimeError("shipped catalog differs from published catalog")
         catalog = json.loads(catalog_bytes)
         feeds = catalog.get("feeds", [])
@@ -41,7 +41,7 @@ def main():
         user, shared = root / "user", root / "shared"
         shared.mkdir()
         (shared / "default.yaml").write_text("schema_list:\n  - schema: rime_ice\n")
-        (shared / "aime.yaml").write_text('config_version: "online-verification"\n')
+        (shared / "kume.yaml").write_text('config_version: "online-verification"\n')
         cases, combined = [], set()
         for index, feed in enumerate(feeds):
             url = feed["url"]
@@ -54,9 +54,9 @@ def main():
             (args.evidence / f"subscription-{index + 1}.log").write_text(process.stdout + process.stderr)
             if process.returncode:
                 raise RuntimeError(f"subscription failed for {feed['id']}; see evidence")
-            subscriptions = json.loads((user / "aime/subscriptions.json").read_text())
+            subscriptions = json.loads((user / "kume/subscriptions.json").read_text())
             item = next(item for item in subscriptions if item["url"] == url)
-            cached = (user / "aime/subscriptions" / (item["id"] + ".txt")).read_bytes()
+            cached = (user / "kume/subscriptions" / (item["id"] + ".txt")).read_bytes()
             sha = hashlib.sha256(cached).hexdigest()
             if item.get("lastError") or item["entryCount"] != feed["entries"]:
                 raise RuntimeError("subscription count or error mismatch")
@@ -68,7 +68,7 @@ def main():
                     combined.add((text, code.replace(" ", "")))
             cases.append({"id": feed["id"], "url": url, "entries": item["entryCount"],
                           "sha256": sha, "bytes": len(cached), "passes": True})
-        table = (user / "aime_online.txt").read_text()
+        table = (user / "kume_online.txt").read_text()
         rows = {tuple(line.split("\t")[:2]) for line in table.splitlines() if line and not line.startswith("#")}
         if rows != combined:
             raise RuntimeError("rebuilt table does not match downloaded subscriptions")

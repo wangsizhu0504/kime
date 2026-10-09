@@ -2,21 +2,21 @@
 # Move Unreleased notes into a dated version section, retaining an empty Unreleased.
 # By default CHANGELOG.md and CHANGELOG.en.md are promoted together (both are validated
 # before either is written) and each new section gets its release status line;
-# AIME_CHANGELOG_STATUS / AIME_CHANGELOG_STATUS_EN override the wording.
-# AIME_CHANGELOG_FILE promotes that single file instead (offline fixture tests); it gets a
-# status line only when AIME_CHANGELOG_STATUS is set. AIME_CHANGELOG_ROOT relocates the pair.
+# KUME_CHANGELOG_STATUS / KUME_CHANGELOG_STATUS_EN override the wording.
+# KUME_CHANGELOG_FILE promotes that single file instead (offline fixture tests); it gets a
+# status line only when KUME_CHANGELOG_STATUS is set. KUME_CHANGELOG_ROOT relocates the pair.
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 if [[ $# -lt 1 || $# -gt 2 ]]; then
   echo 'usage: scripts/promote-changelog.sh <version> [YYYY-MM-DD]' >&2
   exit 1
 fi
-if [[ -n "${AIME_CHANGELOG_FILE:-}" ]]; then
-  TARGETS=("$AIME_CHANGELOG_FILE" "${AIME_CHANGELOG_STATUS:-}")
+if [[ -n "${KUME_CHANGELOG_FILE:-}" ]]; then
+  TARGETS=("$KUME_CHANGELOG_FILE" "${KUME_CHANGELOG_STATUS:-}")
 else
-  DIR="${AIME_CHANGELOG_ROOT:-$ROOT}"
-  TARGETS=("$DIR/CHANGELOG.md" "${AIME_CHANGELOG_STATUS:-开发预览 · Developer ID 签名 · 公证处理中}"
-           "$DIR/CHANGELOG.en.md" "${AIME_CHANGELOG_STATUS_EN:-Developer preview · Developer ID signed · notarization pending}")
+  DIR="${KUME_CHANGELOG_ROOT:-$ROOT}"
+  TARGETS=("$DIR/CHANGELOG.md" "${KUME_CHANGELOG_STATUS:-开发预览 · Developer ID 签名 · 公证处理中}"
+           "$DIR/CHANGELOG.en.md" "${KUME_CHANGELOG_STATUS_EN:-Developer preview · Developer ID signed · notarization pending}")
 fi
 python3 - "$1" "${2:-$(date +%F)}" "${TARGETS[@]}" <<'PY'
 import datetime

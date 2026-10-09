@@ -5,7 +5,7 @@
 
 ## 1. 发版
 
-1. 同步版本号：`project.yml` 的 `MARKETING_VERSION` 和 `Packages/AIMEKit/Sources/aime/AIME.swift` 的 CLI `version`。
+1. 同步版本号：`project.yml` 的 `MARKETING_VERSION` 和 `Packages/KUMEKit/Sources/kume/KUME.swift` 的 CLI `version`。
    tag 去掉 `v` 和 `-` 后缀后必须与这两处一致（`v0.2.0-beta.1` 对应 `0.2.0`），不一致时工作流直接失败。
 2. 先在 `CHANGELOG.md` 与 `CHANGELOG.en.md` 的 Unreleased 下记好本次变更：条目只用新增 / 变更 / 修复 / 移除 / 安全 / 已知问题六类，
    中英文条数与分类一致。然后两份一起提版：
@@ -16,20 +16,20 @@
    ```
 
    脚本把两份文件的 Unreleased 移到新版本段、保留空的 Unreleased、补上发布状态行（默认
-   `> 开发预览 · Developer ID 签名 · 公证处理中`，公证完成后用 `AIME_CHANGELOG_STATUS` / `AIME_CHANGELOG_STATUS_EN` 改写），
+   `> 开发预览 · Developer ID 签名 · 公证处理中`，公证完成后用 `KUME_CHANGELOG_STATUS` / `KUME_CHANGELOG_STATUS_EN` 改写），
    并更新底部比较链接；任一文件为空或版本已存在都会报错，两份都不改。它只改 CHANGELOG，不改 App/CLI 版本、不提交、不打 tag、不发布；
    `bash scripts/test-promote-changelog.sh` 用临时文件测试它。
-   中文这一节会原样写进 Release 说明，官网「更新日志」页也由这两个文件生成（aime-web 的 `npm run sync:changelog`）。
+   中文这一节会原样写进 Release 说明，官网「更新日志」页也由这两个文件生成（kume-web 的 `npm run sync:changelog`）。
    `python3 -m unittest discover -s scripts/tests -p 'test_changelog.py'` 检查格式、中英一致，以及最新版本与 `MARKETING_VERSION` 一致；CI 也会跑。
 3. 提交并等 CI 通过，然后打 tag 并推送：
 
    ```bash
-   git tag -a v0.2.0 -m "AIME 0.2.0"
+   git tag -a v0.2.0 -m "KUME 0.2.0"
    git push origin v0.2.0
    ```
 
 4. 在 Actions 里等 Release 工作流跑完，到 Releases 页面检查草稿：附件、校验值、签名状态，确认无误后点 Publish。
-5. 正式版（已公证、非 `-beta`）发布后更新 Homebrew：在 [zoolapp/homebrew-tap](https://github.com/zoolapp/homebrew-tap) 运行 `bash scripts/update-cask.sh <版本>`（从 get.zool.app 读取 pkg 的 SHA-256），`brew audit --cask --online zoolapp/tap/aime` 通过后推送。
+5. 正式版（已公证、非 `-beta`）发布后更新 Homebrew：在 [zoolapp/homebrew-tap](https://github.com/zoolapp/homebrew-tap) 运行 `bash scripts/update-cask.sh <版本>`（从 get.zool.app 读取 pkg 的 SHA-256），`brew audit --cask --online zoolapp/tap/kume` 通过后推送。
 
 **试跑**：Actions › Release › Run workflow，填写 tag（如 `v0.2.0`，可以还不存在）。
 试跑只把产物上传到这次运行的 artifact，不创建 Release。
@@ -37,22 +37,22 @@
 **本地构建同样的产物**（不安装，只写 `build/` 和 `dist/`）：
 
 ```bash
-bash scripts/release.sh v0.2.0   # → dist/release/AIME-0.2.0.{pkg,zip}、SHA256SUMS.txt、RELEASE_NOTES.md
+bash scripts/release.sh v0.2.0   # → dist/release/KUME-0.2.0.{pkg,zip}、SHA256SUMS.txt、RELEASE_NOTES.md
 ```
 
 ## 2. 产物
 
 | 文件 | 内容 |
 | --- | --- |
-| `AIME-<version>.pkg` | 安装包：`AIME.app` 装到 `/Library/Input Methods`，`AIME Settings.app` 装到 `/Applications` |
-| `AIME-<version>.zip` | `AIME.app`（内含 CLI 和设置应用），手动放进 `~/Library/Input Methods/` |
+| `KUME-<version>.pkg` | 安装包：`KUME.app` 装到 `/Library/Input Methods`，`KUME Settings.app` 装到 `/Applications` |
+| `KUME-<version>.zip` | `KUME.app`（内含 CLI 和设置应用），手动放进 `~/Library/Input Methods/` |
 | `SHA256SUMS.txt` | 上面两个文件的 SHA-256 |
 
-许可材料由构建脚本嵌入 `AIME.app/Contents/Resources/LicenseMaterials/`（见 [license-packaging-verification.md](license-packaging-verification.md)）。
+许可材料由构建脚本嵌入 `KUME.app/Contents/Resources/LicenseMaterials/`（见 [license-packaging-verification.md](license-packaging-verification.md)）。
 
 ## 3. 签名用的 secrets
 
-在仓库 Settings › Secrets and variables › Actions 中添加。**7 个必须全部配置**才会签名并公证（另需 `AIME_MANIFEST_KEY` 给 `latest.json` 签名，正式构建缺它会直接失败）；
+在仓库 Settings › Secrets and variables › Actions 中添加。**7 个必须全部配置**才会签名并公证（另需 `KUME_MANIFEST_KEY` 给 `latest.json` 签名，正式构建缺它会直接失败）；
 一个都没有则构建未签名预览版；只配了一部分时工作流报错，避免误发未签名版本。
 
 | Secret | 内容 |
@@ -64,7 +64,7 @@ bash scripts/release.sh v0.2.0   # → dist/release/AIME-0.2.0.{pkg,zip}、SHA25
 | `APPLE_NOTARY_KEY_ID` | App Store Connect API Key 的 Key ID |
 | `APPLE_NOTARY_ISSUER_ID` | App Store Connect API 的 Issuer ID |
 | `APPLE_NOTARY_KEY_P8_BASE64` | 下载的 `AuthKey_<KeyID>.p8`，base64 编码 |
-| `AIME_MANIFEST_KEY` | 给 `latest.json` 签名的 Ed25519 私钥（`swift scripts/sign-manifest.swift keygen` 生成；公钥写入 `AppUpdateChecker.manifestPublicKey`） |
+| `KUME_MANIFEST_KEY` | 给 `latest.json` 签名的 Ed25519 私钥（`swift scripts/sign-manifest.swift keygen` 生成；公钥写入 `AppUpdateChecker.manifestPublicKey`） |
 
 创建方法：
 
@@ -76,17 +76,17 @@ bash scripts/release.sh v0.2.0   # → dist/release/AIME-0.2.0.{pkg,zip}、SHA25
 3. **写入 secrets**（在本机执行，不要把文件或 base64 内容贴进聊天或提交到仓库）：
 
    ```bash
-   base64 -i DeveloperIDApplication.p12 | gh secret set MACOS_DEVELOPER_ID_APP_P12_BASE64 -R zoolapp/aime
-   gh secret set MACOS_DEVELOPER_ID_APP_P12_PASSWORD -R zoolapp/aime          # 交互式输入
-   base64 -i DeveloperIDInstaller.p12 | gh secret set MACOS_DEVELOPER_ID_INSTALLER_P12_BASE64 -R zoolapp/aime
-   gh secret set MACOS_DEVELOPER_ID_INSTALLER_P12_PASSWORD -R zoolapp/aime
-   gh secret set APPLE_NOTARY_KEY_ID -R zoolapp/aime
-   gh secret set APPLE_NOTARY_ISSUER_ID -R zoolapp/aime
-   base64 -i AuthKey_XXXXXXXXXX.p8 | gh secret set APPLE_NOTARY_KEY_P8_BASE64 -R zoolapp/aime
+   base64 -i DeveloperIDApplication.p12 | gh secret set MACOS_DEVELOPER_ID_APP_P12_BASE64 -R wangsizhu0504/kime
+   gh secret set MACOS_DEVELOPER_ID_APP_P12_PASSWORD -R wangsizhu0504/kime          # 交互式输入
+   base64 -i DeveloperIDInstaller.p12 | gh secret set MACOS_DEVELOPER_ID_INSTALLER_P12_BASE64 -R wangsizhu0504/kime
+   gh secret set MACOS_DEVELOPER_ID_INSTALLER_P12_PASSWORD -R wangsizhu0504/kime
+   gh secret set APPLE_NOTARY_KEY_ID -R wangsizhu0504/kime
+   gh secret set APPLE_NOTARY_ISSUER_ID -R wangsizhu0504/kime
+   base64 -i AuthKey_XXXXXXXXXX.p8 | gh secret set APPLE_NOTARY_KEY_P8_BASE64 -R wangsizhu0504/kime
    ```
 
 工作流把证书导入一次性的临时钥匙串（随机密码），用 Hardened Runtime + 可信时间戳从内到外签名，
-先公证并装订 `AIME.app`，再打包、公证并装订 `.pkg`（`notarytool submit --wait`，单次最多等 30 分钟）。
+先公证并装订 `KUME.app`，再打包、公证并装订 `.pkg`（`notarytool submit --wait`，单次最多等 30 分钟）。
 无论成功失败，最后一步都会删除临时钥匙串和 `.p8`。
 
 ## 4. 未签名预览版
@@ -95,10 +95,10 @@ bash scripts/release.sh v0.2.0   # → dist/release/AIME-0.2.0.{pkg,zip}、SHA25
 说明里写清安装方法。macOS 首次打开会拦截，用户需要：
 
 - `.pkg`：Finder 中右键 › 打开；新版 macOS 到「系统设置 › 隐私与安全性」点「仍要打开」。
-  或只对这个文件执行 `xattr -d com.apple.quarantine AIME-<version>.pkg`。
-- `.zip`：解压，把 `AIME.app` 放进 `~/Library/Input Methods/`，然后执行
-  `xattr -dr com.apple.quarantine "$HOME/Library/Input Methods/AIME.app"`。不要关闭系统全局 Gatekeeper。
-- 安装后在「系统设置 › 键盘 › 输入法」添加「艾么输入法」；首次安装可能要注销重新登录一次。
+  或只对这个文件执行 `xattr -d com.apple.quarantine KUME-<version>.pkg`。
+- `.zip`：解压，把 `KUME.app` 放进 `~/Library/Input Methods/`，然后执行
+  `xattr -dr com.apple.quarantine "$HOME/Library/Input Methods/KUME.app"`。不要关闭系统全局 Gatekeeper。
+- 安装后在「系统设置 › 键盘 › 输入法」添加「酷米输入法」；首次安装可能要注销重新登录一次。
 
 已签名但带 `-beta` 等后缀的 tag 同样标为 Pre-release。
 
@@ -115,21 +115,21 @@ shasum -a 256 -c SHA256SUMS.txt --ignore-missing
 正式签名版还可以检查签名和公证：
 
 ```bash
-pkgutil --check-signature AIME-<version>.pkg     # 应显示 Developer ID Installer: ZOOL LLC (PX694P4CGY)
-spctl --assess --type install --verbose=2 AIME-<version>.pkg
-xcrun stapler validate AIME-<version>.pkg
+pkgutil --check-signature KUME-<version>.pkg     # 应显示 Developer ID Installer: ZOOL LLC (PX694P4CGY)
+spctl --assess --type install --verbose=2 KUME-<version>.pkg
+xcrun stapler validate KUME-<version>.pkg
 ```
 
 
 ## 公证还在排队时
 
-新团队的首次公证可能排几个小时。`release.sh` 最多等 `AIME_NOTARY_WAIT`（默认 20m）：超时不算失败，
+新团队的首次公证可能排几个小时。`release.sh` 最多等 `KUME_NOTARY_WAIT`（默认 20m）：超时不算失败，
 产物照常签名、上传（Release 标题注明「公证处理中」），提交 ID 写入 `NOTARY_PENDING.txt`。Apple 通过后：
 
 ```bash
-gh run download <run-id> -R zoolapp/aime -D /tmp/aime-release
-bash scripts/finish-notarization.sh /tmp/aime-release/AIME-<版本>            # 装订票据、重算校验和、重签 latest.json
-bash scripts/finish-notarization.sh /tmp/aime-release/AIME-<版本> --publish  # 替换 GitHub Release 与 R2 上的文件
+gh run download <run-id> -R wangsizhu0504/kime -D /tmp/kume-release
+bash scripts/finish-notarization.sh /tmp/kume-release/KUME-<版本>            # 装订票据、重算校验和、重签 latest.json
+bash scripts/finish-notarization.sh /tmp/kume-release/KUME-<版本> --publish  # 替换 GitHub Release 与 R2 上的文件
 ```
 
 只有 Apple 判定 `Invalid` 才会让发布失败，并打印 `notarytool log`。
@@ -141,12 +141,12 @@ bash scripts/finish-notarization.sh /tmp/aime-release/AIME-<版本> --publish  #
 App 只信任签名有效的清单，不依赖托管方；
 `minimumSystemVersion` 高于用户系统时不提示更新。开发构建（ad-hoc 签名）不自动检查。
 
-设置“概览”中的“接收测试版”默认关闭，保存在现有 `aime/update.json`。开启检查 beta 清单，关闭只检查稳定清单，
+设置“概览”中的“接收测试版”默认关闭，保存在现有 `kume/update.json`。开启检查 beta 清单，关闭只检查稳定清单，
 稳定通道永远不提示预发布版本（即便清单错误标注）；切换时清空缓存与跳过记录，下次检查使用新通道。
 版本按 SemVer 比较：`0.2.0-beta.1 < 0.2.0-beta.2 < 0.2.0`，相同语义版本再比较 build。
 稳定版同步到 beta 清单后，beta 用户也能升级到同一正式版。
 
 发布仍保持 `project.yml` / CLI 的基础版本为数字形式；构建脚本在签名前向两个暂存 App 的 Info.plist 写入
-`AIMEReleaseVersion` 保存完整预发布版本，避免 beta App 把自己识别为正式版。源码中的版本号不由脚本改写。
+`KUMEReleaseVersion` 保存完整预发布版本，避免 beta App 把自己识别为正式版。源码中的版本号不由脚本改写。
 CI 上传对应通道产物，仅在公证完成后发布清单；补公证脚本也按同样通道重算并签名。
 离线测试：`bash scripts/test-release-manifests.sh`（临时假安装包与临时签名密钥，不访问公证/R2/GitHub）。

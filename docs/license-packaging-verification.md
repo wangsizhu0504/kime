@@ -9,7 +9,7 @@ B01b、B01c 仍未通过；此结果不代表完整依赖许可、GPL 对应源�
 脚本核对许可 SHA-256、Vendor 二进制 SHA-256、刚复制的插件字节及插件目录成员。
 不符合固定清单时返回非零，停止该构建；它不会删除已有资源或重写源清单。
 
-材料位于 `Contents/Resources/LicenseMaterials/`：AIME MIT 许可、第三方声明、三个插件完整许可、
+材料位于 `Contents/Resources/LicenseMaterials/`：KUME MIT 许可、第三方声明、三个插件完整许可、
 原始 manifest、已有审计与发布说明、范围说明，共 9 份内容文件，另有校验 receipt。
 原始 manifest 保留未通过项；receipt 同样将完整许可/完整对应源码审计标为 false。
 Vendor 输入哈希在签名前核对，不能用来校验重新签名后的插件；验收 JSON 另记最终插件哈希。
@@ -25,7 +25,7 @@ Vendor 输入哈希在签名前核对，不能用来校验重新签名后的插�
 | 签名 | 解包后的 App 执行 `codesign --verify --deep --strict --verbose=2` 退出 0；签名为 ad-hoc | `license-packaging-codesign.log`、`license-packaging-signature.log` |
 
 表中简写日志均位于 `build/release-audit/`。本地测试 ZIP：
-`build/license-packaging-check/AIME-license-check.zip`，SHA-256：
+`build/license-packaging-check/KUME-license-check.zip`，SHA-256：
 `172e4f2f6c2535c91b96351c151c733903eacec60dcdcd7e2c4ffb2e7182d626`。
 
 首次使用共享 DerivedData 的构建退出 65，日志明确报告 build.db 被其他构建占用，未计为通过。

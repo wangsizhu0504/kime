@@ -1,6 +1,6 @@
 # Changelog
 
-User-facing changes in each AIME release. The website's Changelog page is generated from this file. 中文：[CHANGELOG.md](CHANGELOG.md).
+User-facing changes in each KUME release. The website's Changelog page is generated from this file. 中文：[CHANGELOG.md](CHANGELOG.md).
 
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html):
 
@@ -22,10 +22,10 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 
 ### Fixed
 
-- With AIME selected, pressing ⌘, in any app opened AIME's settings instead of that app's own. The input menu no longer takes ⌘,.
+- With KUME selected, pressing ⌘, in any app opened KUME's settings instead of that app's own. The input menu no longer takes ⌘,.
 - With double pinyin schemes such as Xiaohe, the zh/z, an/ang, en/eng and other fuzzy pinyin switches in Settings › Fuzzy pinyin & spelling had no effect. They now work; switches turned on earlier are corrected on upgrade, no need to set them again.
-- In some apps the vertical candidate list showed the AIME menu button on the input code row, above the candidates. In vertical layout it now always sits below the list.
-- Right after a first install, while macOS had not yet added AIME to the input source list, Settings and onboarding still said it was enabled. They now say to log out or restart the Mac once, and the installer's last page says so too.
+- In some apps the vertical candidate list showed the KUME menu button on the input code row, above the candidates. In vertical layout it now always sits below the list.
+- Right after a first install, while macOS had not yet added KUME to the input source list, Settings and onboarding still said it was enabled. They now say to log out or restart the Mac once, and the installer's last page says so too.
 
 ## [0.1.6] - 2026-10-07
 
@@ -37,7 +37,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 
 ### Fixed
 
-- Settings › Vocabulary › sentence language model: downloading "Wanxiang · Simplified sentence model" failed with HTTP 403 or 404. Upstream replaced the model file in place, and GitHub rate-limits anonymous downloads, so the old address stopped working. AIME now fetches the upstream release of 2026-10-06 (about 398 MB) from its own download server and verifies it by SHA-256.
+- Settings › Vocabulary › sentence language model: downloading "Wanxiang · Simplified sentence model" failed with HTTP 403 or 404. Upstream replaced the model file in place, and GitHub rate-limits anonymous downloads, so the old address stopped working. KUME now fetches the upstream release of 2026-10-06 (about 398 MB) from its own download server and verifies it by SHA-256.
 - With Wanxiang Pinyin, once Backspace had emptied the composition, further Backspace presses could not delete committed text until another key was pressed. Now only a held Backspace stops at the empty composition to protect committed text; single presses delete as usual.
 
 ## [0.1.5] - 2026-10-07
@@ -46,7 +46,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 
 ### Fixed
 
-- When installing with the package or Homebrew while another copy of AIME.app existed elsewhere (for example an old copy in Downloads), the installer updated that copy instead of installing to /Library/Input Methods, so AIME was missing from System Settings. It now always installs to /Library/Input Methods.
+- When installing with the package or Homebrew while another copy of KUME.app existed elsewhere (for example an old copy in Downloads), the installer updated that copy instead of installing to /Library/Input Methods, so KUME was missing from System Settings. It now always installs to /Library/Input Methods.
 - If the input method does not end up where expected after installation, the installer now reports a failure instead of success.
 
 ## [0.1.4] - 2026-10-07
@@ -55,7 +55,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 
 ### Added
 
-- Settings › Overview has a new "Export Diagnostics…" button. It packs the version, installation state, update state and filtered logs into one ZIP to attach to a bug report; it never includes typed text, word frequencies, frequent phrases, statistics, configuration contents or keys. `aime diagnostics --output <file>.zip` exports the same from the command line; see docs/troubleshooting.md.
+- Settings › Overview has a new "Export Diagnostics…" button. It packs the version, installation state, update state and filtered logs into one ZIP to attach to a bug report; it never includes typed text, word frequencies, frequent phrases, statistics, configuration contents or keys. `kume diagnostics --output <file>.zip` exports the same from the command line; see docs/troubleshooting.md.
 - Settings › Overview has a new "Receive beta versions" option. When on, update checks also offer beta versions; when off, only stable releases. A stable release always counts as newer than a beta with the same number.
 - The input layer handles Command+V plain-text appends, preserving newlines and emoji. An addition that exceeds draft capacity is rejected as a whole instead of committing the draft early.
 
@@ -111,7 +111,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 ### Fixed
 
 - Settings › Sync & Backup › Sync Now: while the input method was running, a sync that actually failed still reported success. The input method now exports its own frequencies and failures are reported. A backup made after a failed sync now says it lacks the latest frequencies.
-- Online word lists: AIME could redeploy every hour even when nothing was due (candidates cleared, "Deploying…" shown); it now redeploys only after downloading new content. Removing a subscription or changing its interval during an update is no longer overwritten.
+- Online word lists: KUME could redeploy every hour even when nothing was due (candidates cleared, "Deploying…" shown); it now redeploys only after downloading new content. Removing a subscription or changing its interval during an update is no longer overwritten.
 - Restoring a backup: settings layers that were empty in the backup left the old settings in place; they are now replaced in full. A restore that fails midway rolls back to the state before it.
 - After a failed deploy, the next deploy skipped the parts that failed and the candidate window's appearance could be wiped; the last working appearance is now kept and failed parts are rebuilt next time. Settings changed during a deploy are no longer missed.
 - Typing statistics: switching windows quickly could drop counts, and cleared statistics could come back.
@@ -123,7 +123,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 
 ### Security
 
-- Restoring rejects backups that contain symbolic links, would write outside the AIME folder, or are abnormally large.
+- Restoring rejects backups that contain symbolic links, would write outside the KUME folder, or are abnormally large.
 
 ### Known issues
 
@@ -156,13 +156,13 @@ The first public developer preview.
 - Read-only import from Squirrel; local backup and restore; word-frequency merge through the RIME sync folder.
 - Typing statistics (optional, off by default, local only); a welcome guide.
 - **Automatic updates**: checks the public release manifest daily, verifies the SHA-256 and developer signature after download, then hands over to the system installer; can be turned off.
-- The `aime` command-line tool (deploy / bench / doctor / import-squirrel / package / get / set / sync / subscribe).
-- The installer contains GPL-3.0 components and is distributed as a whole under GPL-3.0, with the corresponding source `AIME-0.1.0-source.tar.gz`.
+- The `kume` command-line tool (deploy / bench / doctor / import-squirrel / package / get / set / sync / subscribe).
+- The installer contains GPL-3.0 components and is distributed as a whole under GPL-3.0, with the corresponding source `KUME-0.1.0-source.tar.gz`.
 
 ### Known issues
 
 - The installer is signed with ZOOL LLC's Developer ID; Apple notarization is still pending, so the first launch needs Control-click › Open in Finder.
-- The `aime` command-line tool supports Apple silicon only.
+- The `kume` command-line tool supports Apple silicon only.
 
 [Unreleased]: https://github.com/zoolapp/aime/compare/v0.1.6...HEAD
 [0.1.6]: https://github.com/zoolapp/aime/compare/v0.1.5...v0.1.6

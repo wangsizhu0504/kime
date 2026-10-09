@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Light, cheerful score + typing sounds for the AIME launch film, synthesised from scratch (no samples, no network).
+"""Light, cheerful score + typing sounds for the KUME launch film, synthesised from scratch (no samples, no network).
 
 Usage: compose-audio.py <cues.json> <out.wav>
 cues.json comes from `render-launch.mjs --cues` so sounds land on the film's own keystrokes and scene changes.

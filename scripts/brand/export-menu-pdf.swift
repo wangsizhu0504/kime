@@ -2,7 +2,7 @@
 // 16pt vector PDF candidate for the existing tsInputMethodIconFileKey.
 import AppKit
 let root = URL(fileURLWithPath: #filePath).deletingLastPathComponent().deletingLastPathComponent().deletingLastPathComponent()
-let directory = root.appendingPathComponent("assets/brand/aime/base-v1")
+let directory = root.appendingPathComponent("assets/brand/kume/base-v1")
 let raw = try Data(contentsOf: directory.appendingPathComponent("tokens.json"))
 let tokens = try JSONSerialization.jsonObject(with: raw) as! [String: Any]
 let mark = tokens["mark"] as! [String: Any]
@@ -28,9 +28,9 @@ while i < parts.count {
     }
 }
 var box = CGRect(x: 0, y: 0, width: 16, height: 16)
-let output = directory.appendingPathComponent("menu/AIME-bookmark.pdf")
+let output = directory.appendingPathComponent("menu/KUME-bookmark.pdf")
 try FileManager.default.createDirectory(at: output.deletingLastPathComponent(), withIntermediateDirectories: true)
-let context = CGContext(output as CFURL, mediaBox: &box, [kCGPDFContextTitle: "AIME bookmark menu icon", kCGPDFContextCreator: "AIME brand export"] as CFDictionary)!
+let context = CGContext(output as CFURL, mediaBox: &box, [kCGPDFContextTitle: "KUME bookmark menu icon", kCGPDFContextCreator: "KUME brand export"] as CFDictionary)!
 context.beginPDFPage(nil)
 context.translateBy(x: 0, y: 16); context.scaleBy(x: 1, y: -1)
 context.translateBy(x: menu["markX"] as! CGFloat, y: menu["markY"] as! CGFloat)

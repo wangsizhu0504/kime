@@ -55,8 +55,8 @@ def embed(source_root, app):
                  "docs/native-plugin-license-audit.md", "docs/release-checklist.md"]:
         payload[path] = (source_root / path).read_bytes()
     payload["README.txt"] = (
-        "AIME license materials — partial inventory\n"
-        "LICENSE applies to AIME original code; dependencies retain their licenses.\n"
+        "KUME license materials — partial inventory\n"
+        "LICENSE applies to KUME original code; dependencies retain their licenses.\n"
         "licenses/native-plugins contains three audited plugin license texts and their source inventory.\n"
         "The inventory's Vendor hashes describe pre-signing input, not the signed bundle.\n"
         "Full transitive notices, GPL corresponding source and combined-work review remain pending.\n"

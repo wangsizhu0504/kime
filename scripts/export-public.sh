@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Exports the public tree of AIME (what github.com/zoolapp/aime publishes) from a commit,
+# Exports the public tree of KUME (what github.com/wangsizhu0504/kime publishes) from a commit,
 # using an allowlist so internal process notes, review evidence and agent instructions
 # never leave this repository. The result is scanned with gitleaks.
 #
@@ -7,7 +7,7 @@
 #
 # Defaults: HEAD, build/public-export. When <out-dir> is a clone of the public
 # repository its .git is kept, so the export becomes the next public commit:
-#   bash scripts/export-public.sh HEAD ~/AI/aime-public && cd ~/AI/aime-public && git add -A && git commit
+#   bash scripts/export-public.sh HEAD ~/AI/kume-public && cd ~/AI/kume-public && git add -A && git commit
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
@@ -20,16 +20,16 @@ INCLUDE=(
   README.md README.en.md LICENSE THIRD_PARTY_NOTICES.md CHANGELOG.md CHANGELOG.en.md
   CONTRIBUTING.md CONTRIBUTING.zh.md CODE_OF_CONDUCT.md SECURITY.md
   project.yml Apps Packages SharedSupport config dicts licenses scripts Vendor
-  assets/icon.png assets/screenshots assets/brand/aime/base-v1 assets/brand/aime/input-source-v2 assets/social/2026-10-01
+  assets/icon.png assets/screenshots assets/brand/kume/base-v1 assets/brand/kume/input-source-v2 assets/social/2026-10-01
   docs/README.md docs/architecture.md docs/decisions docs/privacy.md docs/rime-config-reference.md
   docs/releasing.md docs/release-checklist.md docs/themes.md docs/troubleshooting.md
   docs/license-packaging-verification.md docs/native-plugin-license-audit.md
 )
 # Removed again from the included directories: tooling output and design-process notes.
 EXCLUDE=(
-  Apps/AIMESettings/.impeccable
-  Apps/AIMESettings/DESIGN.md
-  assets/brand/aime/base-v1/paper-reference-provenance.json
+  Apps/KUMESettings/.impeccable
+  Apps/KUMESettings/DESIGN.md
+  assets/brand/kume/base-v1/paper-reference-provenance.json
 )
 
 STAGE="$(mktemp -d)"

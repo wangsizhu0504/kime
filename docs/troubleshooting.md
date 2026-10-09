@@ -2,19 +2,19 @@
 
 ## 切不了中英，或只能打英文
 
-安装新版后不要用 `open` 手动启动 `AIME.app`。手动启动的实例可能无法连接信息、App Store 版微信等沙盒应用。
-在终端运行 `pkill -x AIME`，然后切回艾么输入法并输入，由系统 imklaunchagent 自动拉起。
+安装新版后不要用 `open` 手动启动 `KUME.app`。手动启动的实例可能无法连接信息、App Store 版微信等沙盒应用。
+在终端运行 `pkill -x KUME`，然后切回酷米输入法并输入，由系统 imklaunchagent 自动拉起。
 首次添加输入法后仍不能使用，可注销并重新登录。不要删除用户词库来尝试修复。
 
 ## 图标还是旧的
 
-检查 `~/Library/Input Methods/AIME.app` 与 `/Library/Input Methods/AIME.app` 是否同时存在。
+检查 `~/Library/Input Methods/KUME.app` 与 `/Library/Input Methods/KUME.app` 是否同时存在。
 诊断报告会将这种情况标为“重复安装”。确认要保留的版本后，退出输入法并把多余的 App 移至备份位置；不要动 Rime 数据目录。
 随后注销并重新登录刷新输入法注册和图标缓存；不要通过手动启动输入法刷新图标。
 
 ## 候选窗不出现
 
-先确认已经切到艾么输入法的中文模式，并在文本编辑等原生应用中输入拼音。
+先确认已经切到酷米输入法的中文模式，并在文本编辑等原生应用中输入拼音。
 在设置“概览”检查输入法是否启用、方案是否已部署，选择已安装的方案后重新部署。
 仅某个应用出问题时，记录应用名称、版本与复现步骤；所有应用都有问题时，先按上面的方式重启输入法。
 仍失败时导出诊断信息，勿直接打包整个 Rime 目录。
@@ -28,8 +28,8 @@ SHA-256 不一致时不要绕过校验或手改校验值；保留原词库，提
 ## AI 动作不可用
 
 在 AI 设置中开启功能，确认已经选中文字、提交候选或准备好草稿，并检查所选模型的可用状态。
-Apple 端侧模型需要系统、硬件、语言与地区支持，并启用 Apple Intelligence、下载所需模型；地区限制可能使设备无法使用该模型。
-自备 OpenAI 兼容接口时，检查 API Key、地址、模型和远端发送授权；不要把密钥或完整接口地址贴进 issue。
+AI 统一使用设置中的自定义 OpenAI 兼容 Provider，不依赖 Apple 智能。
+检查 API Key、地址、模型和远端发送授权；不要把密钥或完整接口地址贴进 issue。
 AI 动作只在主动触发时发送相应文本；常规输入不会自动调用远端模型。
 
 ## 导出诊断信息并提交 issue
@@ -37,7 +37,7 @@ AI 动作只在主动触发时发送相应文本；常规输入不会自动调�
 在设置“概览”页底部点“导出诊断信息…”，阅读保存面板说明后保存 ZIP。也可运行：
 
 ```bash
-aime diagnostics --output /tmp/AIME-diagnostics.zip
+kume diagnostics --output /tmp/KUME-diagnostics.zip
 ```
 
 报告包括版本/build、分发签名状态、macOS 与芯片、安装位置、最近选用方案 id、配置各层文件名与大小、
@@ -45,5 +45,5 @@ aime diagnostics --output /tmp/AIME-diagnostics.zip
 不会复制输入内容、userdb、常用语、输入统计、用户 YAML 原文或 credentials.json；API Key 与 baseURL 仅标记配置状态。
 日志再经过密钥、Bearer 凭据和 URL 路径/查询脱敏，不跟随用户文件的符号链接。
 
-请先在本机解压检查报告，再到仓库 Issues 新建问题，附 macOS/AIME 版本、操作步骤、预期与实际结果及诊断 ZIP。
+请先在本机解压检查报告，再到仓库 Issues 新建问题，附 macOS/KUME 版本、操作步骤、预期与实际结果及诊断 ZIP。
 不要附整个用户目录、原始日志、密钥或真实输入文本。配置文件名可能含自定义名称，提交前也请检查。

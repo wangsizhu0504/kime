@@ -1,12 +1,12 @@
 name: Bug Report / 缺陷反馈
-description: Report a reproducible AIME issue / 反馈可复现问题
+description: Report a reproducible KUME issue / 反馈可复现问题
 title: "[Bug] "
 body:
   - type: markdown
     attributes:
       value: |
-        AIME is pre-alpha; check the README's Roadmap before reporting missing features.
-        AIME 尚处于早期开发阶段，请先查看 README 中的 Roadmap。
+        KUME is pre-alpha; check the README's Roadmap before reporting missing features.
+        KUME 尚处于早期开发阶段，请先查看 README 中的 Roadmap。
         Do not attach typed text, user-frequency databases, full RIME directories, or API keys.
         不要上传输入内容、用户词频库、整个 RIME 目录或 API key。
         For vulnerabilities, follow [SECURITY.md](https://github.com/zoolapp/aime/security/policy).
@@ -22,7 +22,7 @@ body:
   - type: input
     id: version
     attributes:
-      label: AIME version or commit / AIME 版本或 commit
+      label: KUME version or commit / KUME 版本或 commit
     validations:
       required: true
   - type: textarea

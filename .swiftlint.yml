@@ -3,7 +3,7 @@
 excluded:
   - Vendor
   - .build
-  - Packages/AIMEKit/.build
+  - Packages/KUMEKit/.build
   - DerivedData
   - build
 

@@ -50,13 +50,13 @@ func outline(_ text: String, size: CGFloat, weight: Double, tracking: CGFloat = 
 }
 
 let strings: [(String, String, CGFloat, Double, CGFloat)] = [
-    ("name", "艾么输入法", 57, 650, 5),
+    ("name", "酷米输入法", 57, 650, 5),
     ("tagline", "中文常新，自在表达。", 32, 400, 0),
-    ("boardTitle", "艾么输入法 · 视觉基底", 24, 500, 0),
+    ("boardTitle", "酷米输入法 · 视觉基底", 24, 500, 0),
     ("logoLabel", "标志与字标", 18, 500, 0),
     ("squareLabel", "正方形图标", 18, 500, 0),
     ("menuLabel", "菜单栏单色", 18, 500, 0),
-    ("paletteLabel", "朱红 · 纸白 · 墨黑 · 砂金", 18, 500, 0),
+    ("paletteLabel", "蓝色 · 纸白 · 墨黑 · 砂金", 18, 500, 0),
     ("patternLabel", "字签图案与留白", 18, 500, 0),
     ("paperLabel", "纸签形象与材质", 18, 500, 0),
     ("smallLabel", "亮暗背景 · 实际像素", 20, 500, 0),
@@ -66,7 +66,7 @@ let strings: [(String, String, CGFloat, Double, CGFloat)] = [
 ]
 var results: [String: Any] = ["fontSHA256": expected]
 for (key, text, size, weight, tracking) in strings { results[key] = outline(text, size: size, weight: weight, tracking: tracking) }
-let output = root.appendingPathComponent("assets/brand/aime/base-v1/type-outlines.json")
+let output = root.appendingPathComponent("assets/brand/kume/base-v1/type-outlines.json")
 try FileManager.default.createDirectory(at: output.deletingLastPathComponent(), withIntermediateDirectories: true)
 try JSONSerialization.data(withJSONObject: results, options: [.sortedKeys, .prettyPrinted]).write(to: output)
 print("Outlined \(strings.count) strings; all glyphs from pinned Noto Sans SC; \(output.path)")

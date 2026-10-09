@@ -4,13 +4,13 @@
 
 ## 决策
 
-- **AIME.app**：IMK 输入法服务，LSUIElement，进程内运行 librime；候选窗为 AppKit `NSPanel` +
+- **KUME.app**：IMK 输入法服务，LSUIElement，进程内运行 librime；候选窗为 AppKit `NSPanel` +
   Core Text 自绘。只做输入相关的事。
-- **AIME Settings.app**：SwiftUI，嵌在 `AIME.app/Contents/Applications/`，**不链接 librime**：
-  读取 `build/*.yaml`（librime 合并后的结果），把修改写入 `aime/generated/`。
-- **aime CLI**：`AIME.app/Contents/Helpers/aime`，是测试、CI 与设置 App 在输入法未运行时的部署入口。
-- 进程间通信：文件 + `DistributedNotificationCenter`（`dev.luolei.aime.reload` /
-  `dev.luolei.aime.deploy.result`），无特权边界，不需要 XPC。
+- **KUME Settings.app**：SwiftUI，嵌在 `KUME.app/Contents/Applications/`，**不链接 librime**：
+  读取 `build/*.yaml`（librime 合并后的结果），把修改写入 `kume/generated/`。
+- **kume CLI**：`KUME.app/Contents/Helpers/kume`，是测试、CI 与设置 App 在输入法未运行时的部署入口。
+- 进程间通信：文件 + `DistributedNotificationCenter`（`dev.luolei.kume.reload` /
+  `dev.luolei.kume.deploy.result`），无特权边界，不需要 XPC。
 
 ## 理由
 
@@ -45,13 +45,13 @@
 - 跨进程 `WorkspaceLock`（flock），CLI 写命令与输入法部署互斥；设置 App 超时不再另起 CLI 部署；
 - 部署请求带 request id，结果按 id 匹配，前端配置部署失败计入结果；
 - 损坏的补丁层报错并保留上次成功的 shim，而不是当作空配置；
-- 导入/安装改为「临时文件 + 原子替换」，旧文件进 `aime/backup/`，安装失败回滚，跨包共享文件不误删；
-- 包内 `aime/`、`sync/`、`*.userdb`、符号链接、越界路径一律拒绝；`unzip` 先读管道再 wait。
+- 导入/安装改为「临时文件 + 原子替换」，旧文件进 `kume/backup/`，安装失败回滚，跨包共享文件不误删；
+- 包内 `kume/`、`sync/`、`*.userdb`、符号链接、越界路径一律拒绝；`unzip` 先读管道再 wait。
 未做（进 Roadmap）：配置 revision 与部署结果的强绑定、包依赖（`requires`）解析、左右修饰键分别跟踪。
 
 ## 事故记录：激活时的跨进程死锁（2026-09-29）
 
-真机切换到 AIME 后，客户端（Chrome 等）卡死。堆栈：`activateServer` → 按应用选项 `set_option(ascii_mode)` →
+真机切换到 KUME 后，客户端（Chrome 等）卡死。堆栈：`activateServer` → 按应用选项 `set_option(ascii_mode)` →
 librime **同步**发出选项通知 → 状态气泡 → 同步向客户端查询光标位置（`attributesForCharacterIndex`）。
 客户端正阻塞等待 `activateServer` 返回，双方互等直至超时。第二意见曾把「同步通知重入」列为 NIT，当时未修，是误判。
 

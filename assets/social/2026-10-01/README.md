@@ -1,4 +1,4 @@
-# AIME 宣传素材
+# KUME 宣传素材
 
 当前首选主图：**中文常新，自在表达。** 副文案采用两层排版：朱红「开源｜隐私」，墨黑「AI 时代的输入法」，AI 下方用短朱红线强调。保留用户指定的斜侧笔记本场景，界面随屏幕倾斜，介绍整体产品定位。
 
@@ -29,20 +29,20 @@ SVG 是可编辑母版；PNG 由母版直接渲染。生成插图不参与这些
 ```bash
 bash scripts/brand/fetch-font.sh
 swift scripts/brand/export-launch.swift
-# sharp 可由本地 node_modules 或 AIME_BRAND_NODE_MODULES 提供。
+# sharp 可由本地 node_modules 或 KUME_BRAND_NODE_MODULES 提供。
 node scripts/brand/export-launch.mjs
 ```
 
-字体使用与现有品牌一致的固定 Noto Sans SC，SHA-256 校验在脚本内；字体许可见 [OFL](../../brand/aime/base-v1/licenses/NotoSansSC-OFL.txt)。标志及排版遵循仓库 [MIT](../../../LICENSE)，使用名称和标志不得暗示不存在的官方背书。
+字体使用与现有品牌一致的固定 Noto Sans SC，SHA-256 校验在脚本内；字体许可见 [OFL](../../brand/kume/base-v1/licenses/NotoSansSC-OFL.txt)。标志及排版遵循仓库 [MIT](../../../LICENSE)，使用名称和标志不得暗示不存在的官方背书。
 
-中文 alt text：纸白底、朱红字签与 AIME 字标；有些话，适合静静打出来。基于 RIME 的开源 macOS 中文输入法，本地输入、按需 AI、词库订阅更新；0.1.x 开发预览。
+中文 alt text：纸白底、朱红字签与 KUME 字标；有些话，适合静静打出来。基于 RIME 的开源 macOS 中文输入法，本地输入、按需 AI、词库订阅更新；0.1.x 开发预览。
 
-English alt text: AIME on a warm ivory card with a vermilion bookmark: Some words, better typed in quiet. Open-source Chinese input for macOS, built on RIME; local input, optional AI and vocabulary subscriptions; developer preview.
+English alt text: KUME on a warm ivory card with a vermilion bookmark: Some words, better typed in quiet. Open-source Chinese input for macOS, built on RIME; local input, optional AI and vocabulary subscriptions; developer preview.
 
 场景图 alt text：概念插图：柔和日光下，安静书桌上摆着键盘、暗屏电脑与空白纸页，纸页上放着带朱红薄边的纸签。
 
-v2 alt text：AIME 宣传合成图：Mac 和键盘旁有朱红纸签，屏幕展示选区文字、AIME 快捷菜单以及翻译／润色两条示例结果。中文常新，自在表达；翻译、润色，在光标处完成。
+v2 alt text：KUME 宣传合成图：Mac 和键盘旁有朱红纸签，屏幕展示选区文字、KUME 快捷菜单以及翻译／润色两条示例结果。中文常新，自在表达；翻译、润色，在光标处完成。
 
-v3 alt text：AIME 宣传合成图：朱红字签与 AIME 字标，中文常新，自在表达；开源、隐私、AI 时代的输入法。正视屏幕展示快捷菜单和示例结果，下方是完整键盘与纸页书签，界面基于原生参考生成。
+v3 alt text：KUME 宣传合成图：朱红字签与 KUME 字标，中文常新，自在表达；开源、隐私、AI 时代的输入法。正视屏幕展示快捷菜单和示例结果，下方是完整键盘与纸页书签，界面基于原生参考生成。
 
-v4 alt text：AIME 宣传合成图：中文常新，自在表达；朱红小字「开源｜隐私」，墨黑「AI 时代的输入法」带短朱红线。暖色书桌上是斜侧笔记本、前景键盘与纸页书签，屏幕内展示随屏幕倾斜的快捷菜单和示例结果。
+v4 alt text：KUME 宣传合成图：中文常新，自在表达；朱红小字「开源｜隐私」，墨黑「AI 时代的输入法」带短朱红线。暖色书桌上是斜侧笔记本、前景键盘与纸页书签，屏幕内展示随屏幕倾斜的快捷菜单和示例结果。

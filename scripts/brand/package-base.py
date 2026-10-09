@@ -9,11 +9,11 @@ from reportlab.pdfgen import canvas
 from reportlab.lib.utils import ImageReader
 
 root = Path(__file__).resolve().parents[2]
-base = root / "assets/brand/aime/base-v1"
+base = root / "assets/brand/kume/base-v1"
 pdf = base / "brand-reference.pdf"
 c = canvas.Canvas(str(pdf), pagesize=(1600, 1120), invariant=1)
-c.setTitle("AIME Visual Base 1.0")
-c.setAuthor("AIME")
+c.setTitle("KUME Visual Base 1.0")
+c.setAuthor("KUME")
 for page, filename in enumerate(["brand-board.png", "paper-reference.png", "extension-board.png", "small-size-review.png"], start=1):
     c.setFillColorRGB(247/255, 242/255, 233/255)
     c.rect(0, 0, 1600, 1120, stroke=0, fill=1)
@@ -22,7 +22,7 @@ for page, filename in enumerate(["brand-board.png", "paper-reference.png", "exte
     elif filename == "paper-reference.png":
         c.setFillColorRGB(36/255, 35/255, 33/255)
         c.setFont("Helvetica-Bold", 28)
-        c.drawString(60, 1034, "AIME / Paper material & pose references")
+        c.drawString(60, 1034, "KUME / Paper material & pose references")
         c.drawImage(str(base / filename), 60, 248, width=1480, height=740, mask="auto")
         c.setFont("Helvetica", 18)
         c.drawString(60, 160, "Ivory front / vermilion reverse / gentle return curl")
@@ -32,14 +32,14 @@ for page, filename in enumerate(["brand-board.png", "paper-reference.png", "exte
     else:
         c.setFillColorRGB(36/255, 35/255, 33/255)
         c.setFont("Helvetica-Bold", 28)
-        c.drawString(60, 1034, "AIME / Menu icon asset review")
+        c.drawString(60, 1034, "KUME / Menu icon asset review")
         c.drawImage(str(base / filename), 300, 370, width=1000, height=440, mask="auto")
         c.setFont("Helvetica", 18)
         c.drawString(60, 200, "16 / 20 / 24 / 32 px: alpha-matched black and white candidates.")
         c.drawString(60, 160, "This is an asset review, not a macOS input-source screenshot.")
     c.setFillColorRGB(36/255, 35/255, 33/255)
     c.setFont("Helvetica", 12)
-    c.drawRightString(1540, 22, f"AIME BASE 1.0 / {page:02d}")
+    c.drawRightString(1540, 22, f"KUME BASE 1.0 / {page:02d}")
     c.showPage()
 c.save()
 shutil.copy2(root / "LICENSE", base / "LICENSE")
@@ -57,10 +57,10 @@ manifest = {
     "notes": ["Independent SVG masters are editable vectors", "Menu PDF is a 16pt vector candidate", "Reference PDF contains raster pages", "App and menu integration not tested"]
 }
 (base / "manifest.json").write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n")
-archive = base.parent / "aime-brand-base-v1.zip"
+archive = base.parent / "kume-brand-base-v1.zip"
 with zipfile.ZipFile(archive, "w", compression=zipfile.ZIP_DEFLATED) as z:
     for p, name in entries + [(base / "manifest.json", "manifest.json")]:
-        info = zipfile.ZipInfo("aime-brand-base-v1/" + name, date_time=(2026, 10, 1, 0, 0, 0))
+        info = zipfile.ZipInfo("kume-brand-base-v1/" + name, date_time=(2026, 10, 1, 0, 0, 0))
         info.compress_type = zipfile.ZIP_DEFLATED
         info.external_attr = 0o644 << 16
         z.writestr(info, p.read_bytes())

@@ -1,17 +1,17 @@
-# 主题包与 `aime-ime://` 一键导入
+# 主题包与 `kume-ime://` 一键导入
 
 官网 [aime.zool.app/themes/](https://aime.zool.app/themes/) 展示内置主题、提供在线编辑器；每个主题都能生成一个
-`aime-ime://theme` 链接，点击后由「AIME 设置」弹出确认，用户同意后写入本机配置并自动部署。本文是两端（App 与官网）共用的合约。
+`kume-ime://theme` 链接，点击后由「KUME 设置」弹出确认，用户同意后写入本机配置并自动部署。本文是两端（App 与官网）共用的合约。
 
-## 主题包（aime-theme v2）
+## 主题包（kume-theme v2）
 
 ```json
 {
-  "format": "aime-theme",
+  "format": "kume-theme",
   "version": 2,
   "id": "sakura",
   "name": "樱花",
-  "author": "AIME",
+  "author": "KUME",
   "colors": {
     "back_color": "0xF7FFF6F8",
     "border_color": "0x1FC2185B",
@@ -22,9 +22,9 @@
 
 | 字段 | 规则 |
 |---|---|
-| `format` | 必须为 `aime-theme` |
-| `version` | `1`（只有颜色）或 `2`（颜色 + 布局）；更高版本提示更新 AIME |
-| `id` | `^[a-z][a-z0-9_]{1,31}$`；`aime_custom`（设置里的「我的配色」）保留，拒绝导入 |
+| `format` | 必须为 `kume-theme` |
+| `version` | `1`（只有颜色）或 `2`（颜色 + 布局）；更高版本提示更新 KUME |
+| `id` | `^[a-z][a-z0-9_]{1,31}$`；`kume_custom`（设置里的「我的配色」）保留，拒绝导入 |
 | `name` / `author` | 去掉控制字符后 1–40 个字符；`author` 可省略 |
 | `colors` | 下列 13 个键**全部必填**，值为 `0xAARRGGBB`（等同 RIME 的 `color_format: argb`），大小写不限，写入时统一为大写 |
 
@@ -50,12 +50,12 @@
 - **填满**：高亮延伸到候选窗边缘，贴边的角由候选窗圆角裁切，内侧角用 `hilited_corner_radius`；竖排时高亮占满整行。
 - **悬浮**：高亮与边缘保持间距；间距小于候选窗圆角一半时与外框同心（`corner_radius − 间距`，最小 2），否则用 `hilited_corner_radius`。
 
-## `aime-ime://` 链接
+## `kume-ime://` 链接
 
-scheme 用 `aime-ime`（AIME 输入法），而不是常见词 `aime`：多个 App 注册同一 scheme 时 macOS 打开哪个是不确定的。
+scheme 用 `kume-ime`（KUME 输入法），而不是常见词 `kume`：多个 App 注册同一 scheme 时 macOS 打开哪个是不确定的。
 
 ```
-aime-ime://theme?v=2&d=<base64url(规范 JSON)>
+kume-ime://theme?v=2&d=<base64url(规范 JSON)>
 ```
 
 - `d` 是主题包的**规范 JSON**（键按字典序排序、无空白、UTF-8、`/` 不转义）做 base64url（`-_`，无 `=` 填充）。
@@ -64,26 +64,26 @@ aime-ime://theme?v=2&d=<base64url(规范 JSON)>
 - 链接是**自包含**的：不含任何需要联网获取的地址，导入过程完全离线。
 - 官网分享编辑器状态用 `https://aime.zool.app/themes/editor/#d=<同一 d>`，放在 hash 里，不进服务器日志。
 
-## 导入行为（AIME 设置）
+## 导入行为（KUME 设置）
 
-1. 「AIME 设置」注册 `aime-ime` scheme。收到链接后先解码、校验；不合格的链接只提示原因，不写任何文件。
+1. 「KUME 设置」注册 `kume-ime` scheme。收到链接后先解码、校验；不合格的链接只提示原因，不写任何文件。
 2. 弹出确认页：浅色 / 深色候选窗预览、名称、作者、对比度（低于外观页的可读性阈值时显示警告），
    以及「用于浅色 / 深色 / 两者」（按背景亮度预选）。按钮为「导入并启用」「仅导入」「取消」。
 3. 带布局的主题有「同时采用主题的布局」选项（默认勾选），预览随之切换。
-4. **只有用户点击后才写入**，并且只写生成层 `aime/generated/aime.yaml` 的这几项：
+4. **只有用户点击后才写入**，并且只写生成层 `kume/generated/kume.yaml` 的这几项：
    - `preset_color_schemes/<id>`：`name`、`author`、`color_format: argb`、13 个颜色与布局键；
    - 「导入并启用」时再写 `style/color_scheme` 和 / 或 `style/color_scheme_dark`；
-   - 采用布局时写 `style/aime/<布局键>`（这是「外观」页的设置，优先于任何配色），候选窗因此与官网预览一致。
+   - 采用布局时写 `style/kume/<布局键>`（这是「外观」页的设置，优先于任何配色），候选窗因此与官网预览一致。
 5. `id` 与内置主题相同（如 `sakura`）时**不写入配色**，只切换为该内置主题。
 6. 生成层已有同 `id` 的导入主题时，确认页提示「将替换已有的 X」；取消则文件不变。
-7. 写入后照常自动部署，候选窗随即换色；「我的配色」（`aime_custom`）不会被改动。
+7. 写入后照常自动部署，候选窗随即换色；「我的配色」（`kume_custom`）不会被改动。
 8. 多个链接排队，一次只显示一个确认页。
 
 ## 数据来源与校验
 
-- 内置主题来自 `SharedSupport/aime.yaml` 的 `preset_color_schemes`；`scripts/export-themes.py` 导出官网的
-  `src/data/themes.json`（带源文件 SHA-256）和两端测试共用的 fixture（`Tests/AIMECoreTests/Fixtures/theme-v1`）。
-- fixture 记录每个主题的规范 JSON、`aime-ime://` 链接和期望的最低文字对比度；Swift 与官网各自的测试都必须与它逐字一致。
+- 内置主题来自 `SharedSupport/kume.yaml` 的 `preset_color_schemes`；`scripts/export-themes.py` 导出官网的
+  `src/data/themes.json`（带源文件 SHA-256）和两端测试共用的 fixture（`Tests/KUMECoreTests/Fixtures/theme-v1`）。
+- fixture 记录每个主题的规范 JSON、`kume-ime://` 链接和期望的最低文字对比度；Swift 与官网各自的测试都必须与它逐字一致。
 - 官网画廊与详情页的预览图由 `scripts/render-themes.sh` 用 App 的候选窗代码渲染（横排、竖排），与安装后看到的一致；
   编辑器的实时预览按同一套几何规则在浏览器里绘制。
 - 官网编辑器是纯前端：不发起网络请求，状态只在 URL hash 与浏览器本地存储里。

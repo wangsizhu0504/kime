@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Xcode post-build step for AIME.app: copies librime plugins next to librime.1.dylib
+# Xcode post-build step for KUME.app: copies librime plugins next to librime.1.dylib
 # and the assembled SharedSupport into the bundle.
 set -euo pipefail
 ROOT="${SRCROOT:-$(cd "$(dirname "$0")/.." && pwd)}"

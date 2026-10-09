@@ -1,6 +1,6 @@
 // Renders assets/video/launch-2026-10-01 frame by frame (headless Chromium → ffmpeg).
 // Usage: node scripts/video/render-launch.mjs [--stills 2.5,7,...] [--out dist/video] [--fps 30] [--scale 2]
-// Needs playwright-core (AIME_VIDEO_NODE_MODULES or build/video-tools) and a Chromium; never touches user directories.
+// Needs playwright-core (KUME_VIDEO_NODE_MODULES or build/video-tools) and a Chromium; never touches user directories.
 import http from 'node:http';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -13,14 +13,14 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
 const args = Object.fromEntries(process.argv.slice(2).reduce((acc, a, i, all) => a.startsWith('--') ? [...acc, [a.slice(2), all[i + 1]?.startsWith('--') ? true : all[i + 1] ?? true]] : acc, []));
 const fps = Number(args.fps ?? 30), scale = Number(args.scale ?? 2);
 const out = path.resolve(root, args.out ?? 'dist/video');
-const name = 'aime-launch-2026-10-01';
+const name = 'kume-launch-2026-10-01';
 
 const require = createRequire(import.meta.url);
-const modules = process.env.AIME_VIDEO_NODE_MODULES ?? path.join(root, 'build/video-tools/node_modules');
+const modules = process.env.KUME_VIDEO_NODE_MODULES ?? path.join(root, 'build/video-tools/node_modules');
 const { chromium } = require(path.join(modules, 'playwright-core'));
 
 function findChrome() {
-  if (process.env.AIME_CHROME) return process.env.AIME_CHROME;
+  if (process.env.KUME_CHROME) return process.env.KUME_CHROME;
   const cache = path.join(os.homedir(), 'Library/Caches/ms-playwright');
   // The headless shell paints reliably; full Chrome for Testing returned transparent screenshots here.
   const dirs = fs.readdirSync(cache).filter(d => /^chromium_headless_shell-\d+$/.test(d)).sort((a, b) => +b.split('-')[1] - +a.split('-')[1]);
@@ -29,7 +29,7 @@ function findChrome() {
       const p = path.join(cache, d, bin); if (fs.existsSync(p)) return p;
     }
   }
-  throw new Error('No Chromium found; set AIME_CHROME');
+  throw new Error('No Chromium found; set KUME_CHROME');
 }
 
 // Static server: only the film, the brand assets, the screenshots and the pinned font are served.

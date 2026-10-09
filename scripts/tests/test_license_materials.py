@@ -10,9 +10,9 @@ EMBED = runpy.run_path(str(Path(__file__).resolve().parents[1] / "embed-license-
 
 class LicensePackagingTests(unittest.TestCase):
     def setUp(self):
-        self.temporary = tempfile.TemporaryDirectory(prefix="aime-license-test-")
+        self.temporary = tempfile.TemporaryDirectory(prefix="kume-license-test-")
         self.root = Path(self.temporary.name)
-        self.source, self.app = self.root / "source", self.root / "AIME.app"
+        self.source, self.app = self.root / "source", self.root / "KUME.app"
         self.license_path = "licenses/native-plugins/librime-fixture.LICENSE.txt"
         self.vendor_path = "Vendor/librime/lib/rime-plugins/librime-fixture.dylib"
         self.bundle_path = "Contents/Frameworks/rime-plugins/librime-fixture.dylib"

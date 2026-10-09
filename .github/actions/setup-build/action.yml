@@ -1,4 +1,4 @@
-name: Set up AIME build
+name: Set up KUME build
 description: Latest stable Xcode, XcodeGen, cached vendor downloads, pinned librime and dictionaries (SHA-256 verified).
 
 runs:
@@ -27,5 +27,5 @@ runs:
       shell: bash
       run: |
         # fetch-dicts also stages plugins; find needs this directory on a clean checkout.
-        mkdir -p Packages/AIMEKit/.build
+        mkdir -p Packages/KUMEKit/.build
         bash scripts/fetch-dicts.sh

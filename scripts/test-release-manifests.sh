@@ -2,16 +2,16 @@
 # Temporary fixture files and an ephemeral signing key only. No cloud calls.
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-WORK="$(mktemp -d -t aime-manifest-test)"
+WORK="$(mktemp -d -t kume-manifest-test)"
 trap 'rm -rf "$WORK"' EXIT
 umask 077
 swift "$ROOT/scripts/sign-manifest.swift" keygen > "$WORK/key.txt"
-AIME_MANIFEST_KEY="$(awk '/^private:/ {print $2}' "$WORK/key.txt")"
-export AIME_MANIFEST_KEY
+KUME_MANIFEST_KEY="$(awk '/^private:/ {print $2}' "$WORK/key.txt")"
+export KUME_MANIFEST_KEY
 PUBLIC_KEY="$(awk '/^public:/ {print $2}' "$WORK/key.txt")"
 for version in 0.2.0-beta.1 0.2.0; do
-  for extension in pkg zip; do printf 'fixture\n' > "$WORK/AIME-$version.$extension"; done
-  printf 'fixture\n' > "$WORK/AIME-$version-source.tar.gz"
+  for extension in pkg zip; do printf 'fixture\n' > "$WORK/KUME-$version.$extension"; done
+  printf 'fixture\n' > "$WORK/KUME-$version-source.tar.gz"
   bash "$ROOT/scripts/write-update-manifests.sh" "$WORK" "$version" 3 notarized >/dev/null
   swift "$ROOT/scripts/sign-manifest.swift" verify "$WORK/latest-beta.json" "$PUBLIC_KEY"
   if [[ "$version" == *-beta.* ]]; then
@@ -38,7 +38,7 @@ done
 bash "$ROOT/scripts/write-update-manifests.sh" "$WORK" 0.2.0-beta.1 3 notarized >/dev/null
 [[ ! -e "$WORK/latest.json" && ! -e "$WORK/latest.json.sig" ]]
 # Official builds require signatures; tampering must invalidate the signature.
-if AIME_MANIFEST_KEY='' bash "$ROOT/scripts/write-update-manifests.sh" "$WORK" 0.2.0 3 notarized > "$WORK/missing-key.log" 2>&1; then
+if KUME_MANIFEST_KEY='' bash "$ROOT/scripts/write-update-manifests.sh" "$WORK" 0.2.0 3 notarized > "$WORK/missing-key.log" 2>&1; then
   echo 'FAIL: unsigned official manifest accepted' >&2; exit 1
 fi
 bash "$ROOT/scripts/write-update-manifests.sh" "$WORK" 0.2.0 3 notarized >/dev/null
@@ -55,7 +55,7 @@ for version in ('0.2.0-beta.1', '0.2.0'):
     original = json.loads((root / 'latest.json').read_text())
     original.update(version=version, notes='preserve release notes', date='2026-10-01')
     for kind, suffix in [('pkg', '.pkg'), ('zip', '.zip'), ('source', '-source.tar.gz')]:
-        original['files'][kind]['name'] = f'AIME-{version}{suffix}'
+        original['files'][kind]['name'] = f'KUME-{version}{suffix}'
     template = root / 'template.json'
     template.write_text(json.dumps(original))
     sys.argv = ['rewrite', str(root), version, str(template)]

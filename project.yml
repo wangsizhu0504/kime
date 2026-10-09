@@ -1,6 +1,6 @@
-name: AIME
+name: KUME
 options:
-  bundleIdPrefix: app.zool.aime
+  bundleIdPrefix: app.kriszu.kume
   developmentLanguage: zh-Hans
   deploymentTarget:
     macOS: "26.0"
@@ -25,133 +25,133 @@ settings:
     Debug:
       CODE_SIGN_IDENTITY: Apple Development
 packages:
-  AIMEKit:
-    path: Packages/AIMEKit
+  KUMEKit:
+    path: Packages/KUMEKit
 targets:
-  AIME:
+  KUME:
     type: application
     platform: macOS
-    productName: AIME
+    productName: KUME
     sources:
-      - path: Apps/AIME
+      - path: Apps/KUME
       - path: Apps/Shared
     dependencies:
-      - package: AIMEKit
+      - package: KUMEKit
         product: RimeKit
-      - package: AIMEKit
-        product: AIMECore
-      - package: AIMEKit
-        product: AIMEPanel
-      - package: AIMEKit
-        product: AIMEAI
+      - package: KUMEKit
+        product: KUMECore
+      - package: KUMEKit
+        product: KUMEPanel
+      - package: KUMEKit
+        product: KUMEAI
       - sdk: InputMethodKit.framework
       - sdk: Carbon.framework
     info:
-      path: Apps/AIME/Info.plist
+      path: Apps/KUME/Info.plist
       properties:
-        CFBundleDisplayName: AIME
-        CFBundleName: AIME
+        CFBundleDisplayName: KUME
+        CFBundleName: KUME
         NSHumanReadableCopyright: "© 2026 ZOOL LLC. 原创源码 MIT；发行包 GPL-3.0。"
         LSUIElement: true
         LSBackgroundOnly: false
         NSPrincipalClass: NSApplication
         LSApplicationCategoryType: public.app-category.utilities
-        InputMethodConnectionName: app.zool.inputmethod.aime_Connection
-        InputMethodServerControllerClass: AIMEInputController
-        InputMethodServerDelegateClass: AIMEInputController
-        tsInputMethodIconFileKey: AIME.pdf
+        InputMethodConnectionName: app.kriszu.inputmethod.kume_Connection
+        InputMethodServerControllerClass: KUMEInputController
+        InputMethodServerDelegateClass: KUMEInputController
+        tsInputMethodIconFileKey: KUME.pdf
         tsInputMethodCharacterRepertoireKey: [Hans, Hant, Latn]
-        TISInputSourceID: app.zool.inputmethod.aime
+        TISInputSourceID: app.kriszu.inputmethod.kume
         TICapsLockLanguageSwitchCapable: true
         CFBundleShortVersionString: $(MARKETING_VERSION)
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         ComponentInputModeDict:
           tsInputModeListKey:
-            app.zool.inputmethod.aime.hans:
-              TISInputSourceID: app.zool.inputmethod.aime.hans
+            app.kriszu.inputmethod.kume.hans:
+              TISInputSourceID: app.kriszu.inputmethod.kume.hans
               TISIntendedLanguage: zh-Hans
               tsInputModeScriptKey: smUnicodeScript
               tsInputModeCharacterRepertoireKey: [Hans, Hant]
               tsInputModeKeyEquivalentModifiersKey: 4608
-              tsInputModeMenuIconFileKey: AIME.pdf
-              tsInputModeAlternateMenuIconFileKey: AIME.pdf
-              tsInputModePaletteIconFileKey: AIME.pdf
+              tsInputModeMenuIconFileKey: KUME.pdf
+              tsInputModeAlternateMenuIconFileKey: KUME.pdf
+              tsInputModePaletteIconFileKey: KUME.pdf
               tsInputModePrimaryInScriptKey: true
               tsInputModeIsVisibleKey: true
               tsInputModeDefaultStateKey: true
-          tsVisibleInputModeOrderedArrayKey: [app.zool.inputmethod.aime.hans]
+          tsVisibleInputModeOrderedArrayKey: [app.kriszu.inputmethod.kume.hans]
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: app.zool.inputmethod.aime
-        AIME_INFO_TEMPLATE: "$(SRCROOT)/Apps/AIME/Info.plist"
-        INFOPLIST_FILE: "$(DERIVED_FILE_DIR)/AIMEInfo.plist"
+        PRODUCT_BUNDLE_IDENTIFIER: app.kriszu.inputmethod.kume
+        KUME_INFO_TEMPLATE: "$(SRCROOT)/Apps/KUME/Info.plist"
+        INFOPLIST_FILE: "$(DERIVED_FILE_DIR)/KUMEInfo.plist"
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         LD_RUNPATH_SEARCH_PATHS: "$(inherited) @executable_path/../Frameworks"
-        CODE_SIGN_ENTITLEMENTS: Apps/AIME/AIME.entitlements
+        CODE_SIGN_ENTITLEMENTS: Apps/KUME/KUME.entitlements
     preBuildScripts:
       - name: Stamp build metadata
         script: bash "$SRCROOT/scripts/stamp-build-metadata.sh"
-        inputFiles: ["$(AIME_INFO_TEMPLATE)"]
-        outputFiles: ["$(DERIVED_FILE_DIR)/AIMEInfo.plist"]
+        inputFiles: ["$(KUME_INFO_TEMPLATE)"]
+        outputFiles: ["$(DERIVED_FILE_DIR)/KUMEInfo.plist"]
         basedOnDependencyAnalysis: false
     postBuildScripts:
       - name: Embed librime plugins and SharedSupport
         script: bash "$SRCROOT/scripts/embed-runtime.sh"
         basedOnDependencyAnalysis: false
-  AIME Settings:
+  KUME Settings:
     type: application
     platform: macOS
-    productName: AIME Settings
+    productName: KUME Settings
     sources:
-      - path: Apps/AIMESettings
+      - path: Apps/KUMESettings
         excludes: [".impeccable"]
       - path: Apps/Shared
     dependencies:
-      - package: AIMEKit
-        product: AIMECore
-      - package: AIMEKit
-        product: AIMEPanel
-      - package: AIMEKit
-        product: AIMEAI
+      - package: KUMEKit
+        product: KUMECore
+      - package: KUMEKit
+        product: KUMEPanel
+      - package: KUMEKit
+        product: KUMEAI
     info:
-      path: Apps/AIMESettings/Info.plist
+      path: Apps/KUMESettings/Info.plist
       properties:
-        CFBundleDisplayName: AIME Settings
-        CFBundleName: AIME Settings
+        CFBundleDisplayName: KUME Settings
+        CFBundleName: KUME Settings
         NSHumanReadableCopyright: "© 2026 ZOOL LLC. 原创源码 MIT；发行包 GPL-3.0。"
         CFBundleShortVersionString: $(MARKETING_VERSION)
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         LSApplicationCategoryType: public.app-category.productivity
-        # aime-ime://theme?v=1&d=… links from aime.zool.app/themes (docs/themes.md).
+        # kume-ime://theme?v=1&d=… links from aime.zool.app/themes (docs/themes.md).
         CFBundleURLTypes:
-          - CFBundleURLName: app.zool.aime.theme
-            CFBundleURLSchemes: [aime-ime]
+          - CFBundleURLName: app.kriszu.kume.theme
+            CFBundleURLSchemes: [kume-ime]
             CFBundleTypeRole: Viewer
         NSPrincipalClass: NSApplication
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: app.zool.aime.settings
-        AIME_INFO_TEMPLATE: "$(SRCROOT)/Apps/AIMESettings/Info.plist"
-        INFOPLIST_FILE: "$(DERIVED_FILE_DIR)/AIMEInfo.plist"
+        PRODUCT_BUNDLE_IDENTIFIER: app.kriszu.kume.settings
+        KUME_INFO_TEMPLATE: "$(SRCROOT)/Apps/KUMESettings/Info.plist"
+        INFOPLIST_FILE: "$(DERIVED_FILE_DIR)/KUMEInfo.plist"
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
-        CODE_SIGN_ENTITLEMENTS: Apps/AIMESettings/AIMESettings.entitlements
+        CODE_SIGN_ENTITLEMENTS: Apps/KUMESettings/KUMESettings.entitlements
     preBuildScripts:
       - name: Stamp build metadata
         script: bash "$SRCROOT/scripts/stamp-build-metadata.sh"
-        inputFiles: ["$(AIME_INFO_TEMPLATE)"]
-        outputFiles: ["$(DERIVED_FILE_DIR)/AIMEInfo.plist"]
+        inputFiles: ["$(KUME_INFO_TEMPLATE)"]
+        outputFiles: ["$(DERIVED_FILE_DIR)/KUMEInfo.plist"]
         basedOnDependencyAnalysis: false
 schemes:
-  AIME:
+  KUME:
     build:
       targets:
-        AIME: all
-        AIME Settings: all
+        KUME: all
+        KUME Settings: all
     run:
       config: Debug
-  AIME Settings:
+  KUME Settings:
     build:
       targets:
-        AIME Settings: all
+        KUME Settings: all
     run:
       config: Debug
