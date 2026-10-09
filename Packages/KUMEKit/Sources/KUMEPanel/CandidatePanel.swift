@@ -22,6 +22,8 @@ public final class CandidatePanel {
     /// Clips the blur and the text to the (animating) background shape.
     private let effectMask = CALayer()
     private let textMask = CALayer()
+    let candidateHighlight = CAShapeLayer()
+    private let highlightMask = CALayer()
     private var capacity: NSSize = .zero
     /// Visible frames of the screens, fetched when the panel appears: asking AppKit on
     /// every keystroke round-trips to the window server.
@@ -75,6 +77,9 @@ public final class CandidatePanel {
         effect.isHidden = true
         container.addSubview(effect)
         container.addSubview(view)
+        highlightMask.backgroundColor = CGColor(gray: 0, alpha: 1)
+        candidateHighlight.mask = highlightMask
+        container.layer?.insertSublayer(candidateHighlight, below: view.layer)
         window.contentView = container
     }
 
@@ -102,6 +107,12 @@ public final class CandidatePanel {
         let themeLimit = view.theme.maxWidth
         view.maxContentWidth = floor(min(themeLimit > 0 ? themeLimit : .greatestFiniteMagnitude, screenWidth * 0.6))
         view.maxRowWidth = floor(screenWidth * 0.9)
+        var previousSelection = view.state
+        let selectionChanged = previousSelection.highlightedIndex != state.highlightedIndex
+        previousSelection.highlightedIndex = state.highlightedIndex
+        let slidesHighlight = selectionChanged && previousSelection == state
+            && state.presentation == .candidates && state.board == nil && state.status == nil
+        view.drawsCandidateHighlight = state.presentation != .candidates || state.board != nil || state.status != nil
         view.state = state
         let size = view.fittingContentSize
         let margin = Self.margin
@@ -142,6 +153,7 @@ public final class CandidatePanel {
         let radius = min(theme.cornerRadius, size.height / 2)
         CATransaction.begin()
         CATransaction.setDisableActions(true)
+        candidateHighlight.frame = container.bounds
         styleBackground(radius: radius)
         if animate {
             // Start from the previous shape, anchored at the same top-left corner.
@@ -159,6 +171,8 @@ public final class CandidatePanel {
         place(contentFrame, radius: radius)
         CATransaction.commit()
 
+        updateCandidateHighlight(animated: motionAllowed && !appearing && slidesHighlight,
+                                 preservesAnimation: !appearing && previousSelection == state && !selectionChanged)
         if state.busy || state.glow { showBusy(radius: radius, shimmer: state.busy) } else { hideBusy() }
         updateHeroGlow()
 
@@ -367,11 +381,38 @@ public final class CandidatePanel {
                                        cornerWidth: radius, cornerHeight: radius, transform: nil)
         effectMask.frame = rect
         effectMask.cornerRadius = radius
+        highlightMask.frame = rect
+        highlightMask.cornerRadius = radius
         // textMask lives in the text view's coordinate space.
         // The text view is flipped, so is its layer: measure the clip from the top edge.
         textMask.frame = NSRect(x: rect.minX - view.frame.minX, y: view.frame.maxY - rect.maxY,
                                 width: rect.width, height: rect.height)
         textMask.cornerRadius = radius
+    }
+
+    private func updateCandidateHighlight(animated: Bool, preservesAnimation: Bool) {
+        // CandidateView is flipped; the sibling layer uses the container's coordinates.
+        var transform = CGAffineTransform(a: 1, b: 0, c: 0, d: -1,
+                                          tx: view.frame.minX, ty: view.frame.maxY)
+        let target = view.drawsCandidateHighlight ? nil : view.selectedHighlightPath?.copy(using: &transform)
+        let current = candidateHighlight.presentation()?.path ?? candidateHighlight.path
+        let previousTarget = candidateHighlight.path
+        let color = view.theme.hilitedCandidateBackColor
+        CATransaction.begin()
+        CATransaction.setDisableActions(true)
+        candidateHighlight.fillColor = CGColor(srgbRed: color.red, green: color.green, blue: color.blue, alpha: color.alpha)
+        candidateHighlight.path = target
+        if animated, let current, let target {
+            let slide = CABasicAnimation(keyPath: "path")
+            slide.fromValue = current
+            slide.toValue = target
+            slide.duration = 0.1
+            slide.timingFunction = CAMediaTimingFunction(name: .easeOut)
+            candidateHighlight.add(slide, forKey: "selection")
+        } else if !preservesAnimation || previousTarget != target || !motionAllowed {
+            candidateHighlight.removeAnimation(forKey: "selection")
+        }
+        CATransaction.commit()
     }
 
     private func styleBackground(radius: CGFloat) {
@@ -427,7 +468,7 @@ public final class CandidatePanel {
 
     public func hide() {
         container.layer?.removeAllAnimations()
-        for layer in [background, effectMask, textMask] { layer.removeAllAnimations() }
+        for layer in [background, effectMask, textMask, candidateHighlight, highlightMask] { layer.removeAllAnimations() }
         view.layer?.removeAllAnimations()
         hideHoldCue()
         hideBusy()

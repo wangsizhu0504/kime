@@ -135,6 +135,13 @@ public final class CandidateView: NSView {
     public var forcePreedit = false { didSet { invalidate() } }
     /// The input method panel draws its background on an animatable layer instead.
     public var drawsBackground = true { didSet { needsDisplay = true } }
+    /// The floating panel draws this separately so only the background moves.
+    var drawsCandidateHighlight = true
+    var selectedHighlightPath: CGPath? {
+        if needsLayoutPass { performLayout() }
+        guard items.indices.contains(state.highlightedIndex), theme.hilitedCandidateBackColor.alpha > 0 else { return nil }
+        return highlightPath(for: items[state.highlightedIndex].rect).cgPath
+    }
     public var onSelect: ((Int) -> Void)?
     /// Widest the content may get (0 = unlimited). A row that does not fit wraps onto the
     /// next line and a single candidate wider than this is cut with an ellipsis, so long
@@ -916,7 +923,7 @@ public final class CandidateView: NSView {
             }
         }
         for (index, item) in items.enumerated() {
-            if index == state.highlightedIndex, theme.hilitedCandidateBackColor.alpha > 0 {
+            if drawsCandidateHighlight, index == state.highlightedIndex, theme.hilitedCandidateBackColor.alpha > 0 {
                 nsColor(theme.hilitedCandidateBackColor).setFill()
                 highlightPath(for: item.rect).fill()
             }
