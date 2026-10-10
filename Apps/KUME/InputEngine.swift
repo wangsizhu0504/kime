@@ -21,6 +21,8 @@ final class InputEngine {
     let usage = UsageRecorder()
     /// kume/features.json, reloaded when Settings posts `KUMEFeatures.changedNotification`.
     private(set) var features = KUMEFeatures()
+    /// Chinese/English punctuation shared by all apps.
+    var asciiPunct: Bool?
     let logger = Logger(subsystem: "app.kriszu.kume", category: "engine")
     private(set) var paths: KUMEPaths
     private(set) var frontend: ConfigValue = .map([])
@@ -152,9 +154,13 @@ final class InputEngine {
     }
 
     private func reloadFeatures() {
-        let wasTraditional = features.traditional
+        let wasTraditional = features.traditional, wasAsciiPunct = features.asciiPunct
         features = KUMEFeatures.load(paths)
         if features.traditional != wasTraditional { activeController?.applyScriptOption() }
+        if features.asciiPunct != wasAsciiPunct, asciiPunct != nil {
+            asciiPunct = features.asciiPunct
+            activeController?.applyPunctOption()
+        }
         usage.isEnabled = features.usageStats
         if !features.aiPolish { activeController?.cancelPolish() }
     }
@@ -500,6 +506,8 @@ final class InputEngine {
     struct AppOptions {
         /// Configured initial state: true = English, false = Chinese, nil = shared state.
         var asciiMode: Bool?
+        /// Punctuation pinned for this app: true = English, nil = the shared state.
+        var asciiPunct: Bool?
         var inline: Bool?
         var vimMode = false
         var resetModeOnActivate = false
@@ -513,6 +521,7 @@ final class InputEngine {
         var result = AppOptions()
         result.asciiMode = temporaryAppModes[bundleID] ?? options["ascii_mode"]?.boolValue
         result.resetModeOnActivate = temporaryAppModes[bundleID] == nil && (options["reset_mode_on_activate"]?.boolValue ?? false)
+        result.asciiPunct = options["ascii_punct"]?.boolValue
         if options["no_inline"]?.boolValue == true { result.inline = false }
         if options["inline"]?.boolValue == true { result.inline = true }
         result.vimMode = options["vim_mode"]?.boolValue ?? false

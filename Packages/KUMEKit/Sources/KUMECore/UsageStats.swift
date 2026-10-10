@@ -27,6 +27,9 @@ public struct KUMEFeatures: Sendable, Codable, Equatable {
     /// Output Traditional Chinese by default (librime's `traditionalization` switch,
     /// applied to every new session; ⌃⇧4 still toggles it for the moment).
     public var traditional = false
+    /// English punctuation by default (librime's `ascii_punct` switch). The state is
+    /// shared by all apps: ⌃⇧3 in one app switches the others too (#10).
+    public var asciiPunct = false
 
     public struct AIAction: Sendable, Codable, Equatable, Identifiable {
         public var id: UUID
@@ -56,6 +59,7 @@ public struct KUMEFeatures: Sendable, Codable, Equatable {
         draftLayer = try container.decodeIfPresent(Bool.self, forKey: .draftLayer) ?? defaults.draftLayer
         draftAutoCommit = try container.decodeIfPresent(Int.self, forKey: .draftAutoCommit) ?? defaults.draftAutoCommit
         traditional = try container.decodeIfPresent(Bool.self, forKey: .traditional) ?? defaults.traditional
+        asciiPunct = try container.decodeIfPresent(Bool.self, forKey: .asciiPunct) ?? defaults.asciiPunct
     }
 
     public static let changedNotification = Notification.Name("app.kriszu.kume.features")
