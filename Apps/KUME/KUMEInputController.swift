@@ -142,18 +142,13 @@ final class KUMEInputController: IMKInputController {
         // Nothing here may call back into the client: it is blocked until activateServer
         // returns. A reused session may be stale if another window of the same app
         // switched Chinese/English meanwhile, so re-apply the remembered state.
-<<<<<<< HEAD:Apps/KUME/KUMEInputController.swift
         if let session = ensureSession() {
             if appOptions.resetModeOnActivate, let mode = appOptions.asciiMode {
                 session.setOption("ascii_mode", mode)
                 rememberAsciiMode()
             } else { applyAppOptions(newSession: false) }
-=======
-        if ensureSession() != nil {
-            applyAppOptions(newSession: false)
             applyPunctOption()
->>>>>>> b4d69d5 (AIME 0.1.8 — Caps Lock back to Chinese, ⌃⇧3/⌃⇧4 shortcuts, shared punctuation, 以词定字 vs [ ] paging, left/right hold key):Apps/AIME/AIMEInputController.swift
-        }
+        }        }
     }
 
     nonisolated override func deactivateServer(_ sender: Any!) {

@@ -7,9 +7,11 @@ public struct KUMEFeatures: Sendable, Codable, Equatable {
     public var usageStats = false
     /// ⌃⌥P rewrites the selected text with AI. Off by default.
     public var aiPolish = false
-    /// User-configured OpenAI-compatible endpoint and model. No implicit provider.
-    public var aiBaseURL = ""
-    public var aiModel = ""
+    /// Provider and request settings for AI polishing.
+    public var aiProvider = "apple"
+    public var aiBaseURL = "https://api.openai.com/v1"
+    public var aiModel = "gpt-5-mini"
+    public var aiExtraJSON = ""
     /// Explicit consent to send the selected text to `aiBaseURL` when polishing.
     public var aiRemoteAllowed = false
     /// Small KUME button at the end of the candidate window (opens the quick menu).
@@ -50,8 +52,10 @@ public struct KUMEFeatures: Sendable, Codable, Equatable {
         let defaults = KUMEFeatures()
         usageStats = try container.decodeIfPresent(Bool.self, forKey: .usageStats) ?? defaults.usageStats
         aiPolish = try container.decodeIfPresent(Bool.self, forKey: .aiPolish) ?? defaults.aiPolish
+        aiProvider = try container.decodeIfPresent(String.self, forKey: .aiProvider) ?? defaults.aiProvider
         aiBaseURL = try container.decodeIfPresent(String.self, forKey: .aiBaseURL) ?? defaults.aiBaseURL
         aiModel = try container.decodeIfPresent(String.self, forKey: .aiModel) ?? defaults.aiModel
+        aiExtraJSON = try container.decodeIfPresent(String.self, forKey: .aiExtraJSON) ?? defaults.aiExtraJSON
         aiRemoteAllowed = try container.decodeIfPresent(Bool.self, forKey: .aiRemoteAllowed) ?? defaults.aiRemoteAllowed
         panelMenuButton = try container.decodeIfPresent(Bool.self, forKey: .panelMenuButton) ?? defaults.panelMenuButton
         menuHoldKey = try container.decodeIfPresent(ModifierHold.Key.self, forKey: .menuHoldKey) ?? defaults.menuHoldKey

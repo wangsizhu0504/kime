@@ -1449,7 +1449,16 @@
       "default": false,
       "storage": "kume/update.json",
       "key": "receiveBeta",
-      "doc": "docs/rime-config-reference.md#更新通道kume-应用设置"
     }
   ]
 }
+      "doc": "docs/rime-config-reference.md#更新通道kume-应用设置"
+    },
+    {
+      "id": "ai.extraJSON",
+      "title": "自定义请求体",
+      "type": "string",
+      "default": "",
+      "storage": "kume/features.json",
+      "key": "aiExtraJSON",
+      "doc": "docs/rime-config-reference.md#ai-助手kume-应用设置"

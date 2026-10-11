@@ -109,14 +109,6 @@ extension KUMEInputController {
             return engine.showStatus("文字太长（上限 \(TextPolisher.maxLength) 字）")
         }
 
-        guard features.aiRemoteAllowed else {
-            return engine.showStatus("未允许把文字发送到自备接口：设置 › AI 助手")
-        }
-        let provider: OpenAICompatibleProvider
-        do {
-            provider = try OpenAICompatibleProvider(configuration: features)
-        } catch {
-            return engine.showStatus((error as? AIError)?.description ?? "请检查 AI 接口设置")
         }
 
         engine.cancelStatus()
@@ -249,3 +241,11 @@ extension KUMEInputController {
         }
     }
 }
+        let provider: any AIProvider
+        if features.aiProvider == "openai" {
+            guard features.aiRemoteAllowed, let url = URL(string: features.aiBaseURL) else {
+                return engine.showStatus("未允许把文字发送到自备接口：设置 › AI 助手")
+            }
+            provider = OpenAICompatibleProvider(baseURL: url, model: features.aiModel, extraFieldsJSON: features.aiExtraJSON)
+        } else {
+            provider = FoundationModelsProvider()
