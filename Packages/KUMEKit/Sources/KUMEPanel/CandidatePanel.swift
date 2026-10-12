@@ -35,8 +35,8 @@ public final class CandidatePanel {
     private var motionAllowed: Bool {
         animationsEnabled && !NSWorkspace.shared.accessibilityDisplayShouldReduceMotion
     }
-    static let resizeDuration: CFTimeInterval = 0.1
-    static let appearDuration: CFTimeInterval = 0.12
+    static let resizeDuration: CFTimeInterval = 0.12
+    static let appearDuration: CFTimeInterval = 0.15
     /// Room around the content for the layer shadow.
     static let margin: CGFloat = 18
 

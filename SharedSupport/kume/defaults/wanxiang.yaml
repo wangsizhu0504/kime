@@ -1,0 +1,4 @@
+# 万象：默认显示 Emoji 候选；导入配置和用户设置仍可覆盖。
+# switches 的第 4 项为 emoji，与 KUME Settings 解析出的路径一致。
+patch:
+  switches/@3/reset: 1
