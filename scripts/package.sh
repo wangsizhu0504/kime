@@ -17,7 +17,7 @@ ditto --noextattr --noqtn build/Release/KUME.app "$STAGE/root/Library/Input Meth
 mkdir -p "$STAGE/root/Applications"
 ditto --noextattr --noqtn "build/Release/KUME.app/Contents/Applications/KUME Settings.app" "$STAGE/root/Applications/KUME Settings.app"
 # Extended attributes would be archived as ._* AppleDouble files in the payload.
-xattr -cr "$STAGE/root"
+find "$STAGE/root" -exec xattr -c {} +
 
 # Bundles are relocatable by default: Installer would follow any other KUME.app with the
 # same bundle ID (a dev build, a copy in Downloads) and update it in place instead of

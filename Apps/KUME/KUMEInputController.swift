@@ -148,7 +148,7 @@ final class KUMEInputController: IMKInputController {
                 rememberAsciiMode()
             } else { applyAppOptions(newSession: false) }
             applyPunctOption()
-        }        }
+        }
     }
 
     nonisolated override func deactivateServer(_ sender: Any!) {
