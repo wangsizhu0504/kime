@@ -15,6 +15,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 ### Added
 
 - Settings › AI Assistant › OpenAI-compatible endpoint: a new Custom request body field accepts any JSON object whose top-level fields are merged into every request body (model, messages and stream stay under program control). A row of “disable thinking” buttons fills in the right parameter for DeepSeek, Gemini, GLM, Kimi, OpenAI, OpenRouter and Qwen.
+- For 10 seconds after a commit, ⌥Z undoes the latest candidate choice and restores its raw pinyin candidates. Left/right can then move between input segments, and a number or Return selects again. The same recovery is available after a deploy or sync restarts the input session.
 
 ## [0.1.8] - 2026-10-10
 

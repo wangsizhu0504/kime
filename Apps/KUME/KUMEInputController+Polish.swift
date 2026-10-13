@@ -231,6 +231,7 @@ extension KUMEInputController {
         guard let request = polish, request.variants.indices.contains(index),
               let client = client ?? (self.client() as? (any IMKTextInput)) else { return }
         let result = request.variants[index].text
+        invalidateReversibleCommit()
         switch request.target {
         case .draft:
             polish = nil

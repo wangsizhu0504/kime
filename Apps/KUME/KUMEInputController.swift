@@ -35,6 +35,18 @@ final class KUMEInputController: IMKInputController {
     var recentText = RecentText()
     /// Text of the latest commit (see `commitForAction`).
     private var lastCommitted = ""
+    /// The last commit can be reopened briefly so a mistaken choice is recoverable.
+    private struct ReversibleCommit {
+        let input: String
+        let text: String
+        let wasDraft: Bool
+        let date: Date
+    }
+    private var pendingUndoInput: String?
+    private var reversibleCommit: ReversibleCommit?
+    /// After reopening a commit, left/right move the raw spelling caret so the user can
+    /// revisit a particular segment instead of only moving the candidate highlight.
+    private var reselectMode = false
     private var candidateOrder: [Int] = []
     private var candidatePageKey = ""
     private var managedCandidate: CandidatePreferences.Rule?
@@ -70,6 +82,7 @@ final class KUMEInputController: IMKInputController {
     /// Commits whatever is being composed before the engine drops all sessions.
     func flushBeforeEngineRestart() {
         if let session = liveSession, isComposing {
+            armReversibleCommit(from: session.context())
             session.commitComposition()
             sync(client: textClient)
             isComposing = false
@@ -164,6 +177,9 @@ final class KUMEInputController: IMKInputController {
             this.closeMenu()
             this.cancelPolish()
             this.commitPending(client)
+            this.reversibleCommit = nil
+            this.pendingUndoInput = nil
+            this.reselectMode = false
             if this.ownsPanel { this.engine.panel.hide() }
             this.engine.usage.flush()
             if this.engine.activeController === this { this.engine.activeController = nil }
@@ -183,6 +199,7 @@ final class KUMEInputController: IMKInputController {
         guard let session = liveSession, isComposing else { return nil }
         let context = session.context()
         guard context.candidates.isEmpty || !candidateIndices(context, session: session).isEmpty else { return nil }
+        armReversibleCommit(from: context)
         lastCommitted = ""
         session.commitComposition()
         sync(client: client ?? textClient)
@@ -199,7 +216,10 @@ final class KUMEInputController: IMKInputController {
                 session.clearComposition()
                 (client ?? textClient)?.insertText(raw, replacementRange: NSRange(location: NSNotFound, length: 0))
                 hasMarkedText = false
-            } else { session.commitComposition() }
+            } else {
+                armReversibleCommit(from: context)
+                session.commitComposition()
+            }
             sync(client: client ?? textClient)
         }
         // Leaving the field (click elsewhere, app switch): the draft goes into the app.
@@ -249,6 +269,11 @@ final class KUMEInputController: IMKInputController {
                 openMenu(client: client)
                 return true
             }
+            if isReselectHotkey(event) {
+                return restoreReversibleCommit(client: client)
+            }
+            // A new user key makes the previous commit no longer safely reversible.
+            reversibleCommit = nil
             // Keys the polish flow does not consume go on to librime as usual.
             if polish != nil, handlePolishKey(event, client: client) { return true }
             if isPolishHotkey(event) { // AI actions, and 简繁转换 which needs no AI
@@ -296,17 +321,20 @@ final class KUMEInputController: IMKInputController {
                 return false
             }
             engine.cancelStatus()
-            if handlePreferredCandidateKey(keysym, event: event, session: session, client: client) { return true }
+            if !reselectMode, handlePreferredCandidateKey(keysym, event: event, session: session, client: client) { return true }
             // Horizontal candidates follow the visible left/right direction. Rime's
             // default navigator instead moves the spelling caret with these keys.
             if engine.panel.theme.layout == .linear, !engine.panel.theme.vertical,
                event.modifierFlags.intersection([.command, .control, .option, .shift]).isEmpty,
                keysym == RimeKey.left || keysym == RimeKey.right,
+               !reselectMode,
                session.moveCandidate(backward: keysym == RimeKey.left) {
                 sync(client: client)
                 return true
             }
             forwardedToRime = true
+            let beforeKey = session.context()
+            if beforeKey.isComposing { armReversibleCommit(from: beforeKey) }
             handled = session.processKey(keysym, modifiers: mask)
             // IMK never delivers key-ups. Report the release of each real press (not
             // auto-repeats), as Weasel and fcitx do, so schemas can tell taps from a held
@@ -469,6 +497,7 @@ final class KUMEInputController: IMKInputController {
         }
         draftTimer?.cancel()
         if context.isComposing {
+            armReversibleCommit(from: context)
             let accepted = session.commitComposition()
             let committed = session.consumeCommit()
             if let committed {
@@ -500,6 +529,12 @@ final class KUMEInputController: IMKInputController {
         (client ?? textClient)?.insertText(text, replacementRange: NSRange(location: NSNotFound, length: 0))
         hasMarkedText = false
         recentText.append(text)
+        if let record = reversibleCommit, record.wasDraft {
+            // The draft is now in the client. Keep the same reversible commit and
+            // validate its suffix there on ⌥Z, just like a normal commit.
+            reversibleCommit = ReversibleCommit(input: record.input, text: record.text,
+                                                wasDraft: false, date: record.date)
+        }
         if ownsPanel, !isComposing, quickMenu == nil, polish == nil { engine.panel.hide() }
     }
 
@@ -518,10 +553,74 @@ final class KUMEInputController: IMKInputController {
 
     // MARK: - Output
 
+    private func armReversibleCommit(from context: RimeContextSnapshot) {
+        guard !context.input.isEmpty else { return }
+        pendingUndoInput = context.input
+    }
+
+    private func isReselectHotkey(_ event: NSEvent) -> Bool {
+        event.keyCode == 6
+            && event.modifierFlags.contains(.option)
+            && event.modifierFlags.intersection([.command, .control, .shift]).isEmpty
+    }
+
+    func invalidateReversibleCommit() { reversibleCommit = nil }
+
+    /// Removes the last committed text and reopens its raw input. The app text is checked
+    /// before deletion so an intervening edit can never be overwritten.
+    @discardableResult
+    private func restoreReversibleCommit(client suppliedClient: (any IMKTextInput)?) -> Bool {
+        guard let record = reversibleCommit,
+              Date().timeIntervalSince(record.date) <= 10,
+              let session = liveSession,
+              !isComposing,
+              let client = suppliedClient ?? textClient else {
+            engine.showStatus("没有可重选的上一段输入")
+            return true
+        }
+        guard !record.input.isEmpty else { return true }
+
+        var replacement: NSRange?
+        if record.wasDraft {
+            guard draft.text.hasSuffix(record.text) else {
+                reversibleCommit = nil
+                engine.showStatus("上一段输入已改变")
+                return true
+            }
+        } else {
+            let selected = client.selectedRange()
+            guard selected.location != NSNotFound, selected.length == 0,
+                  selected.location >= record.text.utf16.count else {
+                engine.showStatus("上一段输入已改变")
+                return true
+            }
+            let range = NSRange(location: selected.location - record.text.utf16.count,
+                                 length: record.text.utf16.count)
+            guard client.attributedSubstring(from: range)?.string == record.text else {
+                reversibleCommit = nil
+                engine.showStatus("上一段输入已改变")
+                return true
+            }
+            replacement = range
+        }
+
+        guard session.setInput(record.input), session.input == record.input else {
+            engine.showStatus("上一段输入无法恢复")
+            return true
+        }
+        if let replacement { client.insertText("", replacementRange: replacement) }
+        else { _ = draft.removeSuffix(record.text) }
+        reversibleCommit = nil
+        reselectMode = true
+        sync(client: client)
+        return true
+    }
+
     /// Menu text replaces unconfirmed composition, after preserving an existing draft.
     /// Both continuous and closing insertions must leave no old preedit to restore.
     func insertMenuText(_ text: String, client: (any IMKTextInput)?) {
         guard let client = client ?? textClient else { return }
+        reversibleCommit = nil
         if isComposing { liveSession?.clearComposition() }
         isComposing = false
         flushDraft(client: client)
@@ -562,6 +661,13 @@ final class KUMEInputController: IMKInputController {
         guard let session = liveSession, let client else { return }
 
         if let text = session.consumeCommit() {
+            let goesToDraft = commitToDraft || (draftLayerActive && (!draft.isEmpty || DraftBuffer.opensDraft(text)))
+            if let input = pendingUndoInput {
+                reversibleCommit = ReversibleCommit(input: input, text: text,
+                                                   wasDraft: goesToDraft, date: Date())
+            }
+            pendingUndoInput = nil
+            reselectMode = false
             DebugLog.write("commit length=\(text.count) hadMarked=\(hasMarkedText) draft=\(draftLayerActive)")
             engine.usage.record(text, app: bundleID)
             lastCommitted = text
@@ -577,9 +683,12 @@ final class KUMEInputController: IMKInputController {
                 hasMarkedText = false
                 recentText.append(pending + text)
             }
+        } else {
+            pendingUndoInput = nil
         }
 
         var context = session.context()
+        if reselectMode && !context.isComposing { reselectMode = false }
         let schema = session.currentSchema ?? ""
         let pageKey = "\(schema)\u{0}\(context.input)\u{0}\(context.pageNumber)"
         candidateOrder = candidateIndices(context, session: session)
@@ -676,6 +785,7 @@ final class KUMEInputController: IMKInputController {
     private func select(_ index: Int) {
         guard let session = liveSession else { return }
         guard candidateOrder.indices.contains(index) else { return }
+        armReversibleCommit(from: session.context())
         session.selectCandidate(onCurrentPage: candidateOrder[index])
         sync(client: textClient)
     }
@@ -701,10 +811,14 @@ final class KUMEInputController: IMKInputController {
         let selectionKeys = Array(session.selectionKeys.unicodeScalars)
         if key == RimeKey.space {
             if let source = order.firstIndex(of: context.highlightedIndex).map({ order[$0] }) ?? order.first {
+                armReversibleCommit(from: context)
                 session.selectCandidate(onCurrentPage: source)
             }
         } else if let index = selectionKeys.firstIndex(where: { Int32($0.value) == key }) {
-            if order.indices.contains(index) { session.selectCandidate(onCurrentPage: order[index]) }
+            if order.indices.contains(index) {
+                armReversibleCommit(from: context)
+                session.selectCandidate(onCurrentPage: order[index])
+            }
         } else if key == RimeKey.up || key == RimeKey.down ||
                     (engine.panel.theme.layout == .linear && !engine.panel.theme.vertical && (key == RimeKey.left || key == RimeKey.right)) {
             let backward = key == RimeKey.up || key == RimeKey.left

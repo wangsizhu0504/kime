@@ -28,6 +28,17 @@ struct DraftBufferTests {
         #expect(DraftBuffer.decision(keyCode: 0, command: false, control: false) == .toEngine)         // a
     }
 
+    @Test func removeSuffixOnlyRemovesTheExactRecentCommit() {
+        var draft = DraftBuffer()
+        draft.replace(with: "你好世界")
+        let removed = draft.removeSuffix("世界")
+        #expect(removed)
+        #expect(draft.text == "你好")
+        let missing = draft.removeSuffix("不存在")
+        #expect(!missing)
+        #expect(draft.text == "你好")
+    }
+
     @Test func exemptsEnglishFirstAppsPasswordManagersAndSecureFields() {
         #expect(DraftBuffer.isExempt(appStartsInEnglish: true, bundleID: "com.mitchellh.ghostty", secureInput: false))
         #expect(DraftBuffer.isExempt(appStartsInEnglish: false, bundleID: "com.1password.1password", secureInput: false))

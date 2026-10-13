@@ -56,6 +56,14 @@ public struct DraftBuffer: Sendable, Equatable {
 
     public mutating func replace(with newText: String) { text = newText }
 
+    /// Removes an exact suffix, used when undoing the latest draft-layer commit.
+    @discardableResult
+    public mutating func removeSuffix(_ suffix: String) -> Bool {
+        guard !suffix.isEmpty, text.hasSuffix(suffix) else { return false }
+        text.removeLast(suffix.count)
+        return true
+    }
+
     /// What a key does while a draft is pending and nothing is being composed.
     public enum KeyDecision: Sendable, Equatable {
         /// Put the draft into the app; the key is consumed (Return, Esc).

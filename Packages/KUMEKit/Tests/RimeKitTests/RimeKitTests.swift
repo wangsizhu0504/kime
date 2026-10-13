@@ -45,6 +45,17 @@ struct RimeKitTests {
         #expect(session.context().isComposing == false)
     }
 
+    @Test func restoresCommittedInputForReselecting() throws {
+        let session = try RimeEngine.shared.createSession()
+        session.simulate(keySequence: "nihao")
+        let rawInput = session.input
+        #expect(session.processKey(RimeKey.space))
+        #expect(session.consumeCommit() == "你好")
+        #expect(session.setInput(rawInput))
+        #expect(session.input == rawInput)
+        #expect(session.context().candidates.first?.text == "你好")
+    }
+
     /// The frontend forwards every key with its real modifiers and returns librime's
     /// verdict. ⌘ shortcuts are then left to the app by librime itself (all built-in
     /// processors skip Super), while bindings from the deployed config still apply.

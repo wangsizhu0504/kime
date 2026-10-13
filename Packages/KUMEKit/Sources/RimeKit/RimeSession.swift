@@ -142,6 +142,11 @@ public final class RimeSession {
 
     public func clearComposition() { api.pointee.clear_composition(sid) }
 
+    /// Reopens a raw input string after a commit so the user can select another
+    /// candidate without typing the spelling again.
+    @discardableResult
+    public func setInput(_ input: String) -> Bool { api.pointee.set_input(sid, input) }
+
     public var input: String {
         api.pointee.get_input(sid).map { String(cString: $0) } ?? ""
     }
